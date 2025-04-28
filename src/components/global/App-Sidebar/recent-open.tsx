@@ -1,17 +1,22 @@
+"use client"
 import React from 'react'
 import { Project } from '@/generated/prisma'
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
 import { Button } from '@/components/ui/button'
 import { JsonValue } from '@/generated/prisma/runtime/library'
 import { toast } from 'sonner'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
+import { useSlideStore } from '@/store/useSlideStore'
 
 
 type Props = {
     recentProjects: Project[]
 }
 const RecentOpen = ({recentProjects}: Props) => {
-  const router = useRouter
+  const router = useRouter()
+  const { setSlides } = useSlideStore()
+
+
   const handleRecentOpenClick  = (projectId: string, slides:JsonValue) => {
     if(!projectId || !slides){
       toast.error('Project not found',

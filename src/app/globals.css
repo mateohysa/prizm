@@ -37,7 +37,8 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --creative-ai-gradient: linear-gradient(180deg, #F55C7A 0% #F6BC66 100%);
+    --creative-ai-gradient: linear-gradient(180deg, #F55C7A 0%, #F6BC66 100%);
+    --creative-yellow: #FFC20E;
   }
 
   .dark {
@@ -83,9 +84,25 @@
     @apply bg-background text-foreground;
   }
   .text-prizm{
-    background: linear-gradient(180deg, #F55C7A 0% #F6BC66 100%);
+    background: linear-gradient(180deg, #F55C7A 0%, #F6BC66 100%);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+  
+  .text-vivid {
+    color: var(--creative-yellow);
+  }
+  
+  .border-vivid {
+    border-color: transparent;
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+  }
+}
+
+@layer utilities {
+  .bg-vivid-gradient {
+    background-image: var(--creative-ai-gradient);
   }
 }
