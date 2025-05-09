@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import AppSidebar from '@/components/global/App-Sidebar'
 import { getRecentProjects } from '@/actions/project'
-import { SidebarTrigger } from '@/components/ui/sidebar'
+import { SidebarTrigger} from '@/components/ui/sidebar'
 import UpperInfoBar from '@/components/global/upper-info-bar'
 
 type Props = {
@@ -17,18 +17,19 @@ const Layout = async ({children}: Props) => {
     
     if(!checkUser.user) redirect("/sign-in")
     return (
-    <SidebarProvider>
+    <SidebarProvider >
       
       
-  
+      <SidebarInset className="flex flex-col h-screen">
+        <UpperInfoBar user={checkUser.user} ><main> {children}</main></UpperInfoBar>
+      </SidebarInset>
+
       <AppSidebar
         user={checkUser.user}
         recentProjects={recentProjects.data || []} 
-        
-        />
-      <SidebarInset className="flex h-screen w-full flex-col pl-[212px]">
-        <UpperInfoBar user={checkUser.user}>{children}</UpperInfoBar>
-      </SidebarInset>
+      />
+      
+      
       
     </SidebarProvider>
   )

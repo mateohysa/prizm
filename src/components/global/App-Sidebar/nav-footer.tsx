@@ -18,26 +18,25 @@ const NavFooter = ({prismaUser}: {prismaUser: User}) => {
         <SidebarMenuItem>
             <div className="flex flex-col gap-y-6 items-start group-data-[collapsible=icon]:hidden">
                 {!prismaUser.subscription && (
-                    <div className="flex flex-col items-start p-2 pb-3 gap-2 bg-background-90 rounded-xl">
-                        <div className="flex flex-col items-start">
-                            <p className="text-sm font-medium">
+                    <div className="flex flex-col items-start p-2 pb-3 gap-2 bg-background-80">
+                        <div className="flex flex-col items-start gap-1">
+                            <p className="text-base font-bold">
                                 Get <span className="text-vivid">Creative AI</span>
                             </p>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-sm dark:text-secondary">
                                 Unlock all features including AI and more
                             </span>
                         </div>
                         <Button
-                            className="w-full 
-                            bg-transparent 
-                            hover:bg-background-80 
-                            text-foreground 
-                            border border-border
-                            rounded-md 
-                            h-8
-                            text-xs
-                            font-medium"
-                            variant="outline"
+                            className="w-full
+                            border-vivid 
+                            bg-background-80 
+                            hover:bg-background-90
+                            text-primary
+                            rounded-full
+                            font-bold"
+                            variant={'default'}
+                            size={'lg'}
                             // onClick={handleUpgradig}
                         >
                             {loading ? 'Upgrading...' : 'Upgrade'}
