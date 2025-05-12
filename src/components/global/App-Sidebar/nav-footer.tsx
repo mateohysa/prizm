@@ -18,7 +18,7 @@ const NavFooter = ({prismaUser}: {prismaUser: User}) => {
       <SidebarMenuItem>
         {/* Upgrade CTA hidden when sidebar is collapsed */}
         {!prismaUser.subscription && (
-          <div className="flex flex-col items-start p-2 pb-3 gap-2 bg-background-80 group-data-[collapsible=icon]:hidden  rounded-lg">
+          <div className="flex flex-col items-start p-2 pb-3 gap-2 bg-background-80 group-data-[collapsible=icon]:hidden ml-2 rounded-lg">
             <div className="flex flex-col items-start gap-1">
               <p className="text-base font-bold">
                 Get <span className="text-vivid">Creative AI</span>
@@ -48,8 +48,8 @@ const NavFooter = ({prismaUser}: {prismaUser: User}) => {
         <SignedIn>
           <SidebarMenuButton
             size="lg"
-            tooltip={user?.fullName || ""}
-            className="data-[state=open]:bg-transparent hover:bg-transparent hover:text-foreground active:bg-transparent"
+            tooltip={user?.fullName || ''}
+            className="data-[state=open]:bg-transparent hover:bg-transparent hover:text-foreground active:bg-transparent ml-2"
             onClick={() => console.log("User profile clicked")}
           >
             <UserButton />

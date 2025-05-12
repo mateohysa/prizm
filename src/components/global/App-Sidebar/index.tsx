@@ -42,7 +42,7 @@ const AppSidebar = ({recentProjects, user, ...props}:
     React.ComponentProps<typeof Sidebar>) => {
 
     return (
-      <Sidebar collapsible='icon'
+      <Sidebar collapsible='offcanvas'
       {...props}
       className="max-w-[212px] bg-background-90 transition-all duration-300 ease-in-out">
         <SidebarHeader className="pt-6 px-3 pb-0">
