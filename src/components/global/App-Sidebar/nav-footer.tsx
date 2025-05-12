@@ -15,54 +15,55 @@ const NavFooter = ({prismaUser}: {prismaUser: User}) => {
 
   return (
     <SidebarMenu>
-        <SidebarMenuItem>
-            <div className="flex flex-col gap-y-6 items-start group-data-[collapsible=icon]:hidden">
-                {!prismaUser.subscription && (
-                    <div className="flex flex-col items-start p-2 pb-3 gap-2 bg-background-80">
-                        <div className="flex flex-col items-start gap-1">
-                            <p className="text-base font-bold">
-                                Get <span className="text-vivid">Creative AI</span>
-                            </p>
-                            <span className="text-sm dark:text-secondary">
-                                Unlock all features including AI and more
-                            </span>
-                        </div>
-                        <Button
-                            className="w-full
-                            border-vivid 
-                            bg-background-80 
-                            hover:bg-background-90
-                            text-primary
-                            rounded-full
-                            font-bold"
-                            variant={'default'}
-                            size={'lg'}
-                            // onClick={handleUpgradig}
-                        >
-                            {loading ? 'Upgrading...' : 'Upgrade'}
-                        </Button>
-                    </div>
-                )}
-
-                <SignedIn>
-                    <SidebarMenuButton 
-                        size={'lg'} 
-                        className="data-[state=open]:bg-transparent hover:bg-transparent hover:text-foreground active:bg-transparent"
-                        onClick={() => console.log("User profile clicked")}
-                    >
-                        <UserButton />
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate text-foreground">
-                                {user?.fullName}
-                            </p>
-                            <p className="text-xs truncate text-muted-foreground">
-                                {user?.emailAddresses[0]?.emailAddress}
-                            </p>
-                        </div>
-                    </SidebarMenuButton>
-                </SignedIn>
+      <SidebarMenuItem>
+        {/* Upgrade CTA hidden when sidebar is collapsed */}
+        {!prismaUser.subscription && (
+          <div className="flex flex-col items-start p-2 pb-3 gap-2 bg-background-80 group-data-[collapsible=icon]:hidden  rounded-lg">
+            <div className="flex flex-col items-start gap-1">
+              <p className="text-base font-bold">
+                Get <span className="text-vivid">Creative AI</span>
+              </p>
+              <span className="text-sm dark:text-secondary">
+                Unlock all features including AI and more
+              </span>
             </div>
-        </SidebarMenuItem>
+            <Button
+              className="w-full
+              border
+              border-vivid
+              bg-background-70
+              hover:bg-background-90
+              text-primary
+              rounded-xl
+              font-bold"
+              variant="outline"
+              size={'lg'}
+              // onClick={handleUpgradig}
+            >
+              {loading ? 'Upgrading...' : 'Upgrade'}
+            </Button>
+          </div>
+        )}
+        {/* Always show the user icon; hide text when collapsed */}
+        <SignedIn>
+          <SidebarMenuButton
+            size="lg"
+            tooltip={user?.fullName || ""}
+            className="data-[state=open]:bg-transparent hover:bg-transparent hover:text-foreground active:bg-transparent"
+            onClick={() => console.log("User profile clicked")}
+          >
+            <UserButton />
+            <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
+              <p className="text-sm font-medium truncate text-foreground">
+                {user?.fullName}
+              </p>
+              <p className="text-xs truncate text-muted-foreground">
+                {user?.emailAddresses[0]?.emailAddress}
+              </p>
+            </div>
+          </SidebarMenuButton>
+        </SignedIn>
+      </SidebarMenuItem>
     </SidebarMenu>
   )
 }

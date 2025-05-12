@@ -19,15 +19,18 @@ const Layout = async ({children}: Props) => {
     return (
     <SidebarProvider >
       
-      
-      <SidebarInset className="flex flex-col h-screen">
-        <UpperInfoBar user={checkUser.user} ><main> {children}</main></UpperInfoBar>
-      </SidebarInset>
-
       <AppSidebar
         user={checkUser.user}
         recentProjects={recentProjects.data || []} 
       />
+      <SidebarInset className="flex flex-col h-screen">
+        <UpperInfoBar user={checkUser.user} >
+          <main className='flex-1 overflow-auto p-6'> 
+            {children}
+          </main>
+        </UpperInfoBar>
+      </SidebarInset>
+
       
       
       

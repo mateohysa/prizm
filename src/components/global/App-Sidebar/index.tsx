@@ -44,11 +44,11 @@ const AppSidebar = ({recentProjects, user, ...props}:
     return (
       <Sidebar collapsible='icon'
       {...props}
-      className="max-w-[212px] bg-background-90">
+      className="max-w-[212px] bg-background-90 transition-all duration-300 ease-in-out">
         <SidebarHeader className="pt-6 px-3 pb-0">
           <AppSidebarHeaderContent />
         </SidebarHeader>  
-        <SidebarContent className="px-3 mt-10 gap-y-6">
+        <SidebarContent className=" px-3 mt-10 gap-y-6 mr-2">
           <NavMain items={data.navMain} />
           <RecentOpen recentProjects={recentProjects} />
         </SidebarContent>
