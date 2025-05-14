@@ -25,7 +25,7 @@ const AppSidebarHeaderContent = () => {
         <div className='flex aspect-square size-8 items-center justify-center rounded-lg text-sidebar-primary-foreground'>
           <Avatar className="h-10 w-10 rounded-full">
                     <AvatarImage
-                        src={'/prizm.svg'}
+                        src={'/prizm.png'}
                         alt='Prizm Logo'                  
                         className="max-w-xs"
                     />

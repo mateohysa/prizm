@@ -6,6 +6,10 @@ import AppSidebar from '@/components/global/App-Sidebar'
 import { getRecentProjects } from '@/actions/project'
 import { SidebarTrigger} from '@/components/ui/sidebar'
 import UpperInfoBar from '@/components/global/upper-info-bar'
+import { Separator } from '@/components/ui/separator'
+import { Breadcrumb, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage, BreadcrumbItem, BreadcrumbList } from '@/components/ui/breadcrumb'
+import TestAppSidebar from '@/components/global/Test-Sidebar'
+import NotFound from '@/components/global/not-found'
 
 type Props = {
   children: React.ReactNode
@@ -17,23 +21,20 @@ const Layout = async ({children}: Props) => {
     
     if(!checkUser.user) redirect("/sign-in")
     return (
-    <SidebarProvider >
-      
+    <SidebarProvider className="w-full min-h-screen bg-background">
       <AppSidebar
         user={checkUser.user}
-        recentProjects={recentProjects.data || []} 
+        recentProjects={recentProjects.data || []}
       />
-      <SidebarInset className="flex flex-col h-screen">
-        <UpperInfoBar user={checkUser.user} >
-          <main className='flex-1 overflow-auto p-6'> 
-            {children}
-          </main>
-        </UpperInfoBar>
-      </SidebarInset>
 
-      
-      
-      
+    <SidebarInset>
+        <UpperInfoBar user={checkUser.user} />
+        <div className="flex flex-1 flex-col gap-4 p-4">
+        
+          {children}
+          <NotFound />
+        </div> 
+      </SidebarInset>
     </SidebarProvider>
   )
 }
