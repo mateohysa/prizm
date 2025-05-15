@@ -1,9 +1,11 @@
 import React from 'react'
-import { Earth } from 'lucide-react'
+import { TriangleAlert } from 'lucide-react'
+
 const NotFound = () => {
   return (
     <div className='flex flex-col min-h-[70vh] w-full justify-center items-center gap-12'>
-        <Earth />
+        {/* <Earth /> */}
+        <TriangleAlert className='text-primary' size={100} />
 
 
         <div className="flex flex-col items-center justify-center text-center">

@@ -57,3 +57,48 @@ export const getRecentProjects = async () => {
         return {status: 500, error:"Error getting projects"}
     }
 }
+
+export const recoverProject = async (projectId: string) => {
+    try {
+        const checkUser = await onAuthenticateUser()
+        if(checkUser.status!== 200 || !checkUser.user){
+            return {status: 403, error:"User not authenticated"}
+        }
+        const updatedProject = await client.project.update({
+            where: {
+                id: projectId,
+            },
+            data: {
+                isDeleted: false,
+            }
+        })
+        if(!updatedProject){
+            return {status: 500, error:"Failed to recover project"}
+        }
+        return {status: 200, message: "Project recovered successfully"}
+    } catch (error) {
+         console.error(error)
+         return {status: 500, error: "Error recovering project"}
+    }
+}
+
+export const deleteProject = async (projectId: string) => {
+    try {
+        const checkUser = await onAuthenticateUser()
+        if(checkUser.status!== 200 || !checkUser.user){
+            return {status: 403, error:"User not authenticated"}
+        }
+        const deletedProject = await client.project.delete({
+            where: {
+                id: projectId,
+            }
+        })
+        if(!deletedProject){
+            return {status: 500, error:"Failed to recover project"}
+        }
+        return {status: 200, message: "Project deleted successfully"}
+    } catch (error) {
+         console.error(error)
+         return {status: 500, error: "Error deleting project"}
+    }
+}

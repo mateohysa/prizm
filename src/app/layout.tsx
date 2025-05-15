@@ -7,6 +7,9 @@ import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Prizm",
+  icons: {
+    icon: '/prizm.png',
+  },
   description: "Prizm transforms your text into slides through AI.",
 };
 
