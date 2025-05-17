@@ -6,9 +6,6 @@ import AppSidebar from '@/components/global/App-Sidebar'
 import { getRecentProjects } from '@/actions/project'
 import { SidebarTrigger} from '@/components/ui/sidebar'
 import UpperInfoBar from '@/components/global/upper-info-bar'
-import { Separator } from '@/components/ui/separator'
-import { Breadcrumb, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage, BreadcrumbItem, BreadcrumbList } from '@/components/ui/breadcrumb'
-import TestAppSidebar from '@/components/global/Test-Sidebar'
 import NotFound from '@/components/global/not-found'
 
 type Props = {

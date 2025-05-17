@@ -49,7 +49,7 @@ const NavFooter = ({prismaUser}: {prismaUser: User}) => {
           <SidebarMenuButton
             size="lg"
             tooltip={user?.fullName || ''}
-            className="data-[state=open]:bg-transparent hover:bg-transparent hover:text-foreground active:bg-transparent ml-2"
+            className="data-[state=open]:bg-transparent hover:bg-transparent hover:text-foreground active:bg-transparent "
             onClick={() => console.log("User profile clicked")}
           >
             <UserButton />

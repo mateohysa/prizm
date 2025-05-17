@@ -90,10 +90,10 @@ const ProjectCard = ({projectId,
         <div className='relative aspect-[16/9] rounded-lg cursor-pointer overflow-hidden'
         onClick={handleNavigation}
         >
-            <ThumbnailPreview theme={theme} 
+            {/* <ThumbnailPreview theme={theme} 
             ///WIP ADD SLIDE DATA
             // slide={JSON.parse(JSON.stringify(slideData))?. [0]}
-            />
+            /> */}
         </div>
         <div className='w-full'>
             <div className='space-y-1'>

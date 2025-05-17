@@ -24,7 +24,7 @@ const DashboardPage = async () => {
       </div>
       {/* {Projects} */}
 
-      <ProjectCard />
+      
       {allProjects.projects && allProjects.projects.length > 0 ?(
         <Projects projects={allProjects.projects}/>
       ) :
