@@ -8,6 +8,10 @@ import { ChevronLeftIcon, Loader2, RotateCcw } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import CardList from '../Common/CardList'
+import RecentPrompts from './RecentPrompts'
+import usePromptStore from '@/store/usePromptStore'
+import { toast } from 'sonner'
+import { generateCreativePrompt } from '@/actions/aiModel'
 
 type Props = {
     onBack: () => void
@@ -17,17 +21,18 @@ const CreateAI = ({onBack}: Props) => {
     const router = useRouter()
 
     //states
-    const [editing, setEditing] = useState<string | null>(null)
+    const [editingCard, setEditingCard] = useState<string | null>(null)
     const [isGenerating, setIsGenerating] = useState(false)
     const [selectedCard, setSelectedCard] = useState<string | null>(null)
     const [noOfCards, setNoOfCards] = useState(0)
     const [editText, setEditText] = useState("")
     //stores
-        const {currentAiPrompt, setCurrentAiPrompt, outlines, resetOutlines} = useCreativeAIStore()
+    const {currentAiPrompt, setCurrentAiPrompt, outlines, resetOutlines, addOutline, addMultipleOulines} = useCreativeAIStore()
+    const {prompts, addPrompt} = usePromptStore()
         
     //functions
     const resetCards = () => {
-        setEditing(null)
+        setEditingCard(null)
         setSelectedCard(null)
         setEditText("")
 
@@ -36,7 +41,19 @@ const CreateAI = ({onBack}: Props) => {
         // setNoOfCards(0)
         // setCurrentAiPrompt('')
     }
-    /// WIP const generateOutline = () => {}
+    const generateOutline = async () => {}
+
+    const handleGenerate = async () => {
+        if(currentAiPrompt===""){
+            toast.error("Error!", {
+                description: "Please enter a prompt to generate an outline",
+            })
+            return
+        }
+        setIsGenerating(true)
+        const res = await generateCreativePrompt(currentAiPrompt)
+        ///WIP use gemini to sort this out.
+    }
     const handleBack = () => {
         onBack()
     }
@@ -129,7 +146,39 @@ const CreateAI = ({onBack}: Props) => {
             </Button>
         </div>
 
-        <CardList/>
+        <CardList 
+        outlines={outlines}
+        editingCard={editingCard}
+        selectedCard={selectedCard}
+        editText={editText}
+        addOutline={addOutline}
+        onEditChange={setEditText}
+        addMultipleOutlines={addMultipleOulines}
+        onCardSelect={setSelectedCard}
+        setEditText={setEditText}
+        setEditingCardCard={setEditingCard}
+        setSelectedCard={setSelectedCard}
+        onCardDoubleClick={(id,title)=>{
+            setEditingCard(id)
+            setEditText(title)
+        }}
+        
+        />
+        {outlines.length > 0 && (
+            
+        <Button
+        className='w-full'
+        onClick={handleGenerate}
+        disabled={isGenerating}
+        >
+            {isGenerating? (
+                <>
+                <Loader2 className='mr-2 animate-spin' /> Generating...
+                </>
+            ) : "Generate"}
+        </Button>
+    )}
+        {prompts?.length > 0 && <RecentPrompts />}
     </motion.div>
   )
 }

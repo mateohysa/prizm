@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import usePromptStore from '@/store/usePromptStore'
 import CreatePage from './CreatePage/CreatePage'
 import CreateAI from './GenAi/CreativeAI'
+import ScratchPage from './Scratch/ScratchPage'
 type Props = {}
 
 const RenderPage = (props: Props) => {
@@ -16,7 +17,7 @@ const RenderPage = (props: Props) => {
     const handleSelectOption = (option: string) => {
       if(option === 'template'){
         router.push('/templates')
-      }else if(option === 'scratch'){
+      }else if(option === 'create-scratch'){
         setPage('create-scratch')
       }else if(option === 'creative-ai'){
         setPage('creative-ai')
@@ -29,7 +30,7 @@ const RenderPage = (props: Props) => {
         case 'creative-ai':
           return <CreateAI onBack={handleBack}/>
         case 'create-scratch':
-          return <></>
+          return <ScratchPage onBack={handleBack}/>
         default:
       }
     }
