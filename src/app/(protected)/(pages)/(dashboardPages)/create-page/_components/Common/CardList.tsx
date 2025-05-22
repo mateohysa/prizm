@@ -126,13 +126,13 @@ const CardList = ({
     const getDragOverStyle = (cardIndex: number) => {
         if(dragOverIndex===null || draggedItem===null) return {}
         if(cardIndex===dragOverIndex) return {
-            borderTop: '2px solid #000',
+            borderTop: '2px solid #ffffff',
             marginTop: '0.5 rem',
             transition: 'margin 0.2s cubic-bezier(0,25, 0.1, 0.25, 1)',
         }
         else if (cardIndex === dragOverIndex - 1) {
             return {
-                borderBottom: '2px solid #000',
+                borderBottom: '2px solid #ffffff',
                 marginBottom: '0.5 rem',
                 transition: 'margin 0.2s cubic-bezier(0,25, 0.1, 0.25, 1)'
                 

@@ -6,12 +6,14 @@ import useCreativeAIStore from '@/store/useCreativeAIStore'
 import { motion } from 'framer-motion'
 import { ChevronLeftIcon, Loader2, RotateCcw } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import CardList from '../Common/CardList'
 import RecentPrompts from './RecentPrompts'
 import usePromptStore from '@/store/usePromptStore'
 import { toast } from 'sonner'
 import { generateCreativePrompt } from '@/actions/aiModel'
+import { OutlineCard } from '@/lib/types'
+import { v4 as uuid } from 'uuid'
 
 type Props = {
     onBack: () => void
@@ -52,11 +54,37 @@ const CreateAI = ({onBack}: Props) => {
         }
         setIsGenerating(true)
         const res = await generateCreativePrompt(currentAiPrompt)
-        ///WIP use gemini to sort this out.
+        if(res.status===200 && res?.data?.outlines){
+            const cardsData: OutlineCard[] = []
+            res.data?.outlines.map((outline: string, index:number)=>{
+                const newCard = {
+                    id: uuid(),
+                    title: outline,
+                    order: index + 1,
+
+                }
+                cardsData.push(newCard)
+            })
+            addMultipleOulines(cardsData)
+            setNoOfCards(cardsData.length)
+            toast.success("Success!", {description: "Outline generated successfully"})
+        }else{
+            toast.error("Error!", {description: "Failed to generate outline. Please try again."})
+        }
+        setIsGenerating(false)
     }
     const handleBack = () => {
         onBack()
     }
+
+    // const handleGenerate = () => {
+
+    // }
+
+
+    useEffect(()=>{
+        setNoOfCards(outlines.length)
+    },[outlines.length])
   return (
     <motion.div 
     className='space-y-6 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'
@@ -130,7 +158,7 @@ const CreateAI = ({onBack}: Props) => {
         </motion.div>
         <div className='w-full flex justify-center items-center'>
             <Button className='font-medium text-lg flex gap-2 items-center'
-            // onClick={generateOutline}
+            onClick={handleGenerate}
             disabled={isGenerating}
             >
                 {
@@ -145,6 +173,9 @@ const CreateAI = ({onBack}: Props) => {
                 }
             </Button>
         </div>
+
+
+        {/* WIP TO FIX ISSUES WITH DRAG AND DROP ON CREATIVE AI PAGE */}
 
         <CardList 
         outlines={outlines}
@@ -175,7 +206,9 @@ const CreateAI = ({onBack}: Props) => {
                 <>
                 <Loader2 className='mr-2 animate-spin' /> Generating...
                 </>
-            ) : "Generate"}
+            ) : (
+                "Generate"
+            )}
         </Button>
     )}
         {prompts?.length > 0 && <RecentPrompts />}

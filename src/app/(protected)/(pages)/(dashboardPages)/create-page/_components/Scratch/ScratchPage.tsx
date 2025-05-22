@@ -109,7 +109,7 @@ const ScratchPage = ({onBack}: Props) => {
                 
                 
                 <div className='flex items-center gap-3'>
-                <Select 
+                {/* <Select 
                 value={outlines.length > 0 ? outlines.length.toString() : '0'}
                 >
 
@@ -130,7 +130,7 @@ const ScratchPage = ({onBack}: Props) => {
                             ))
                     )}
                 </SelectContent>
-                </Select>
+                </Select> */}
                 <Button
                 variant="destructive"
                 size="icon"

@@ -19,7 +19,7 @@ function Switch({ className, ...props }: React.ComponentProps<typeof SwitchPrimi
       {/* Left icon (moon) always visible, but show black when under thumb */}
       <Moon
         className={cn(
-          "absolute left-1 top-1/2 -translate-y-1/2 h-5 w-5 text-black dark:text-white z-10 ml-0.5 opacity-60",
+          "absolute left-1 top-1/2 -translate-y-1/2 h-4 w-4 text-black dark:text-white z-10 ml-1 opacity-60",
           "group-data-[state=unchecked]:text-black",
           "group-data-[state=unchecked]:dark:text-black"
         )}
@@ -27,7 +27,7 @@ function Switch({ className, ...props }: React.ComponentProps<typeof SwitchPrimi
       {/* Right icon (sun) always visible, but show black when under thumb */}
       <Sun
         className={cn(
-          "absolute right-1 top-1/2 -translate-y-1/2 h-5 w-5 text-black dark:text-white z-10 mr-0.5 opacity-60",
+          "absolute right-1 top-1/2 -translate-y-1/2 h-4 w-4 text-black dark:text-white z-10 mr-1 opacity-60",
           "group-data-[state=checked]:text-black",
           "group-data-[state=checked]:dark:text-black"
         )}
