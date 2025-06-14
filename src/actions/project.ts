@@ -5,6 +5,13 @@ import { onAuthenticateUser } from "./user"
 import { client } from "@/lib/prisma"
 import { OutlineCard } from "@/lib/types"
 
+/**
+ * Fetch all projects
+ * 1. Authenticate user
+ * 2. Query non-deleted projects sorted by updatedAt
+ * 3. If none found, return 404
+ * 4. Return project list
+ */
 export const getAllProjects = async () => {
     try{
         const checkUser = await onAuthenticateUser()
@@ -32,6 +39,13 @@ export const getAllProjects = async () => {
     }
 }
 
+/**
+ * Fetch recent projects
+ * 1. Authenticate user
+ * 2. Query top 5 non-deleted projects by updatedAt
+ * 3. If none found, return 404
+ * 4. Return recent projects
+ */
 export const getRecentProjects = async () => {
     try{
         const checkUser = await onAuthenticateUser()
@@ -59,6 +73,13 @@ export const getRecentProjects = async () => {
     }
 }
 
+/**
+ * Recover deleted project
+ * 1. Authenticate user
+ * 2. Update isDeleted flag to false
+ * 3. If update fails, return error
+ * 4. Return success message
+ */
 export const recoverProject = async (projectId: string) => {
     try {
         const checkUser = await onAuthenticateUser()
@@ -78,11 +99,18 @@ export const recoverProject = async (projectId: string) => {
         }
         return {status: 200, message: "Project recovered successfully"}
     } catch (error) {
-         console.error(error)
+         console.error("❌ ERROR:", error)
          return {status: 500, error: "Error recovering project"}
     }
 }
 
+/**
+ * Delete project
+ * 1. Authenticate user
+ * 2. Delete project record by ID
+ * 3. If deletion fails, return error
+ * 4. Return success message
+ */
 export const deleteProject = async (projectId: string) => {
     try {
         const checkUser = await onAuthenticateUser()
@@ -99,12 +127,19 @@ export const deleteProject = async (projectId: string) => {
         }
         return {status: 200, message: "Project deleted successfully"}
     } catch (error) {
-         console.error(error)
+         console.error("❌ ERROR:", error)
          return {status: 500, error: "Error deleting project"}
     }
 }
 
-
+/**
+ * Create new project
+ * 1. Validate title and outlines inputs
+ * 2. Authenticate user
+ * 3. Create project record with timestamps
+ * 4. If creation fails, return error
+ * 5. Return created project data
+ */
 export const createProject = async (title: string, outlines: OutlineCard[]) => {
     try{
         if(!title || outlines.length === 0 || !outlines){
@@ -132,7 +167,35 @@ export const createProject = async (title: string, outlines: OutlineCard[]) => {
         return {status: 200, data: project}
     }
     catch(error){
-        console.error(error)
+        console.error("❌ ERROR:", error)
         return {status: 500, error: "Internal server error"}
+    }
+}
+
+/**
+ * Fetch project details
+ * 1. Authenticate user
+ * 2. Query project by ID
+ * 3. If not found, return 404
+ * 4. Return project data
+ */
+export const getProjectById = async (projectId: string) => {
+    try{
+        const checkUser = await onAuthenticateUser()
+        if(checkUser.status !== 200 || !checkUser.user){
+            return {status: 403, error: "User not authenticated"}
+        }
+        const project = await client.project.findFirst({
+            where: {
+                id: projectId,
+            }
+        })
+        if(!project){
+            return {status: 404, error: "Project not found"}
+        }
+        return {status: 200, data: project}
+    }catch(error){
+        console.error("❌ ERROR:", error)
+        return {status: 500, error: "Internal server error when finding project (outer)"}
     }
 }

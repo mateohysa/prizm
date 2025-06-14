@@ -13,7 +13,9 @@ import usePromptStore from '@/store/usePromptStore'
 import { toast } from 'sonner'
 import { generateCreativePrompt } from '@/actions/aiModel'
 import { OutlineCard } from '@/lib/types'
-import { v4 as uuid } from 'uuid'
+import { v4 as uuid, v4 } from 'uuid'
+import { createProject } from '@/actions/project'
+import { useSlideStore } from '@/store/useSlideStore'
 
 type Props = {
     onBack: () => void
@@ -31,6 +33,7 @@ const CreateAI = ({onBack}: Props) => {
     //stores
     const {currentAiPrompt, setCurrentAiPrompt, outlines, resetOutlines, addOutline, addMultipleOulines} = useCreativeAIStore()
     const {prompts, addPrompt} = usePromptStore()
+    const {setProject} = useSlideStore()
         
     //functions
     const resetCards = () => {
@@ -43,9 +46,8 @@ const CreateAI = ({onBack}: Props) => {
         // setNoOfCards(0)
         // setCurrentAiPrompt('')
     }
-    const generateOutline = async () => {}
 
-    const handleGenerate = async () => {
+    const generateOutline = async () => {
         if(currentAiPrompt===""){
             toast.error("Error!", {
                 description: "Please enter a prompt to generate an outline",
@@ -77,9 +79,38 @@ const CreateAI = ({onBack}: Props) => {
         onBack()
     }
 
-    // const handleGenerate = () => {
+   const handleGenerate = async () => {
+    setIsGenerating(true)
+    if(outlines.length===0){
+        toast.error("Error!", {description: "No outlines found. Please generate an outline first."})
+        setIsGenerating(false)
+        return
+    }
+    try{
+        const res = await createProject(currentAiPrompt, outlines.slice(0,noOfCards))
+        if(res.status!==200){
+            throw new Error('Unable to create project')
+        }
+        router.push(`/presentation/${res.data?.id}/select-theme`)
+        setProject(res.data!)
 
-    // }
+        addPrompt({
+            id: v4(),
+            title: currentAiPrompt ||  outlines?.[0]?.title,
+            outlines: outlines,
+            createdAt: new Date().toISOString()
+        })
+
+        toast.success("Success!", {description: "Project created successfully"})
+        setCurrentAiPrompt("")
+        resetOutlines()
+    }catch(error){
+        console.log(error)
+        toast.error("Error!", {description: "Failed to create project. Please try again."})
+    }finally{
+        setIsGenerating(false)
+    }
+   }
 
 
     useEffect(()=>{
@@ -158,7 +189,7 @@ const CreateAI = ({onBack}: Props) => {
         </motion.div>
         <div className='w-full flex justify-center items-center'>
             <Button className='font-medium text-lg flex gap-2 items-center'
-            onClick={handleGenerate}
+            onClick={generateOutline}
             disabled={isGenerating}
             >
                 {
@@ -175,7 +206,6 @@ const CreateAI = ({onBack}: Props) => {
         </div>
 
 
-        {/* WIP TO FIX ISSUES WITH DRAG AND DROP ON CREATIVE AI PAGE */}
 
         <CardList 
         outlines={outlines}

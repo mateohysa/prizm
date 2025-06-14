@@ -33,7 +33,7 @@ const RecentPrompts = (props: Props) => {
             Your Recent Prompts
         </motion.h2>
         <motion.div variants={containerVariants}
-        className='space=y-2 w-full lg:max-w-[55%] mx-auto'
+        className='space=y-2 w-full lg:max-w-[85%] mx-auto'
         >
             {prompts.map((prompt, index) => (
                 <motion.div variants={itemVariants}

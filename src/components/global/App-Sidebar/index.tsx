@@ -26,12 +26,12 @@ const AppSidebarHeaderContent = () => {
           <Avatar className="h-10 w-10 rounded-full">
                     <AvatarImage
                         src={'/prizm.png'}
-                        alt='Prizm Logo'                  
+                        alt='Presix Logo'                  
                         className="max-w-xs"
                     />
           </Avatar>
         </div>
-        {state === "expanded" && <span className='truncate text-primary text-3xl font-semibold'>prizm</span>}
+        {state === "expanded" && <span className='truncate text-primary text-3xl font-semibold'>presix</span>}
         </SidebarMenuButton>
     </>
   );
