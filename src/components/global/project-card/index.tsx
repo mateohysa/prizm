@@ -83,7 +83,7 @@ const ProjectCard = ({projectId,
     <motion.div
     variants={itemVariants}
     
-    className={`group w-full flex flex-col gap-y-3 rounded-xl p-3 transition-colors
+    className={`group w-full flex flex-col gap-y-3 rounded-xl p-3 border-2 transition-colors
     ${!isDeleted && 'hover:bg-muted/50'}
     `}
     >
@@ -98,7 +98,7 @@ const ProjectCard = ({projectId,
         <div className='w-full'>
             <div className='space-y-1'>
                 <h3 className='font-semibold text-base text-primary line-clamp-1'>
-                    {title} Some Title
+                    {title}
                 </h3>
                 <div className='flex w-full justify-between items-center gap-2'>
                     <p className='text-sm text-muted-foreground'

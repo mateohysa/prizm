@@ -24,7 +24,7 @@ const UpperInfoBar = ({user}: Props) => {
         
         
 
-      <div className='w-full flex flex-wrap items-center gap-4'>
+      <div className='w-full flex flex-wrap items-center gap-8'>
         <SidebarTrigger />
         <Separator orientation='vertical' className='sm:block mr-2 h-4' />
         <SearchBar />

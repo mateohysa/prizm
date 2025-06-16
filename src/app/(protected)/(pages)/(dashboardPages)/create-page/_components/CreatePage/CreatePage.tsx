@@ -1,8 +1,7 @@
 "use client"
-import { Button } from '@/components/ui/button'
 import { containerVariants, CreatePageCard, itemVariants } from '@/lib/constants'
 import { motion } from 'framer-motion'
-import React, { useEffect } from 'react'
+import React from 'react'
 import RecentPrompts from '../GenAi/RecentPrompts'
 import usePromptStore from '@/store/usePromptStore'
 
@@ -40,11 +39,12 @@ const CreatePage = ({onSelectOption}: Props) => {
                         duration:0.1
                     }
                 }}
+                onClick={() => onSelectOption(option.type)}
                 className={`${
                     option.highlight
                     ? 'bg-vivid-gradient'
                     : 'hover:bg-vivid-gradient border'
-                } rounded-xl p-[1px] transition-all duration-300 ease-in-out`}
+                } rounded-xl p-[1px] transition-all duration-300 ease-in-out cursor-pointer`}
                 >
                     <motion.div
                     className='w-full p-4 flex flex-col items-start bg-white dark:bg-black rounded-xl'
@@ -71,19 +71,6 @@ const CreatePage = ({onSelectOption}: Props) => {
                                 {option.description}
                             </p>
                         </div>
-                        <motion.div
-                        className='self-end'
-                        whileHover={{ scale: 1.05}}
-                        whileTap={{ scale: 0.95}}
-                        >
-                            <Button
-                            variant={option.highlight ? 'default' : 'outline'}
-                            className='w-full mt-2'
-                            onClick={()=>onSelectOption(option.type)}
-                            >
-                                {option.highlight ? 'Generate' : 'Continue'}
-                            </Button>
-                        </motion.div>
                     </motion.div>
                 </motion.div>
                 ))}

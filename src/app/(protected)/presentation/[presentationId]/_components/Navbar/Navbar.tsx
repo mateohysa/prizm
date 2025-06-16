@@ -24,7 +24,7 @@ const Navbar = ({presentationId, presentationTitle}: Props) => {
     className='fixed top-0 left-0 right-0 z-50 w-full h-20 flex justify-between items-center py-4 px-7 border-b'
     style={{backgroundColor: 
         currentTheme.navbarColor || currentTheme.backgroundColor,
-        color: currentTheme.accentColor
+        //color: currentTheme.accentColor
     }}
     >
         <Link href={`/dashboard`}
@@ -38,7 +38,7 @@ const Navbar = ({presentationId, presentationTitle}: Props) => {
             }}
             >
                 <Home className='w-4 h-4' />
-                <span className='hidden sm:inline'>Return Home</span>
+                <span className='hidden sm:inline'>Home</span>
 
             </Button>
         </Link>

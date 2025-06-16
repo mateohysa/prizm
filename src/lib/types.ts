@@ -139,4 +139,11 @@ interface Component {
 }
 
 
+export interface LayoutSlides {
+  slideName: string;
+  content: ContentItem;
+  className?: string;
+  type: string;
+}
+
 

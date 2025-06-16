@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSlideStore } from '@/store/useSlideStore'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -8,6 +8,10 @@ const LayoutPreview = (props: Props) => {
     const {getOrderedSlides, reorderSlides} = useSlideStore()
     const slides = getOrderedSlides()
     const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        if(typeof window !== 'undefined') setLoading(false)
+    }, [])
   return (
     <div
     className='w-64 h-full fixed left-0 top-20 border-r  overflow-y-auto'
@@ -22,8 +26,22 @@ const LayoutPreview = (props: Props) => {
             : 
             <div className='p-4 pb-32 space-y-6'>
                 <div className='flex items-center justify-between'>
-
+                    <h2 className='text-sm font-medium dark:text-white text-gra-500'>
+                        SLIDES
+                    </h2>
+                    <span className='text-xs dark:text-gray-200 text-gray-400' suppressHydrationWarning>
+                        {slides.length} slides
+                    </span>
                 </div>
+                {/* TODO ADD DRAGGABLE SLIDE PREVIEW */}
+                {/* {slides.map((slide,index)=>(
+                    <DraggableSlidePreview
+                    key={slide.id || index} 
+                    slide={slide} 
+                    index={index} 
+                    moveSlide={moveSlide}
+                    />
+                ))} */}
             </div>
             }
         </ScrollArea>
