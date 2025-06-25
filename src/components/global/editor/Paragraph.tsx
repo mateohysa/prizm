@@ -20,8 +20,10 @@ const Paragraph = React.forwardRef<HTMLTextAreaElement, ParagraphProps>(({
         const textarea = textareaRef.current
         if(textarea && !isPreview){
             const adjustHeight = () => {
-                textarea.style.height = '0';
-                textarea.style.height = `${textarea.scrollHeight}px`;
+                // Reset to 'auto' first so min-height rules apply and we never
+                // collapse to 0 px when the textarea is empty.
+                textarea.style.height = 'auto'
+                textarea.style.height = `${textarea.scrollHeight}px`
             }
             adjustHeight()
             textarea.addEventListener('input', adjustHeight)
@@ -55,10 +57,9 @@ const Paragraph = React.forwardRef<HTMLTextAreaElement, ParagraphProps>(({
         }}
         readOnly={isPreview}
         {...props}
-        >
-            {props.value}
-        </textarea>
+        />
     )
 })
 
+Paragraph.displayName = 'Paragraph'
 export default Paragraph

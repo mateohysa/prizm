@@ -121,9 +121,9 @@ export const DraggableSlide:React.FC<DraggableSlideProps> = (
         ref={ref}
         className={cn(
             'w-full rounded-lg shadow-lg relative p-0',
-            'min-h-[160px] sm:min-h-[220px] md:min-h-[300px] lg:min-h-[400px] max-h-[800px]',
             'shadow-xl transition-shadow duration-300',
-            'flex flex-col',
+            'overflow-hidden flex flex-col',
+            'min-h-[160px] sm:min-h-[220px] md:min-h-[300px] lg:min-h-[400px]',
             index === currentSlide ? 'ring-2 ring-blue-500 ring-offset-2' : '',
             slide.className,
             isDragging ? 'opacity-50' : 'opacity-100'
@@ -133,7 +133,7 @@ export const DraggableSlide:React.FC<DraggableSlideProps> = (
         }}
         onClick={()=>setCurrentSlide(index)}
         >
-            <div className='h-full w-full flex-grow overflow-hidden'>
+            <div className='h-full w-full overflow-hidden flex flex-col'>
                 <MasterRecursiveComponent 
                 content={slide.content}
                 isPreview={false}
@@ -153,7 +153,7 @@ export const DraggableSlide:React.FC<DraggableSlideProps> = (
                     <Button variant='ghost'
                     onClick={()=>handleDelete(slide.id)}
                     >
-                        <Trash className='w-5 h-5 text-red-500'/>
+                        <Trash className='w-5 h-5 text-white-500'/>
                         <span className='sr-only'>Delete Slide</span>
                     </Button>
                 </PopoverContent>

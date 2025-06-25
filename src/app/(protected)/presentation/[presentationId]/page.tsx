@@ -86,8 +86,8 @@ const Page = (props: Props) => {
         backgroundColor: currentTheme.backgroundColor,
       }}
       >
-        <LayoutPreview/>
-        <div className='flex-1 ml-64 pr-16'>
+        <LayoutPreview hiddenOnMobile={true} />
+        <div className='flex-1 sm:ml-64 pr-4 sm:pr-16'>
           <Editor isEditable={true} />
         </div>
         

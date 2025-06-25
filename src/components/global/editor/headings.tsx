@@ -17,10 +17,12 @@ const createHeading = (displayName: string, defaultClassName: string) => {
                 
                 const textArea = textAreaRef.current
                 if(textArea && !isPreview){
-                    const adjustHeight = ()=>{
-                        textArea.style.height = '0'
+                    const adjustHeight = () => {
+                        // First let the textarea grow/shrink naturally
+                        textArea.style.height = 'auto'
+                        // Then explicitly set it to its scroll height so that
+                        // it fits the content and never collapses to 0px.
                         textArea.style.height = `${textArea.scrollHeight}px`
-    
                     }
                     
                     textArea?.addEventListener('input', adjustHeight)

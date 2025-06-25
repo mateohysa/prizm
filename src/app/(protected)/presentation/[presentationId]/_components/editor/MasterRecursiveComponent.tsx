@@ -7,6 +7,9 @@ import { cn } from '@/lib/utils'
 import Dropzone from './Dropzone'
 import { Heading2 } from '@/components/global/editor/headings'
 import Paragraph from '@/components/global/editor/Paragraph'
+import TableComponent from '@/components/global/editor/TableComp'
+import ColumnComponent from '@/components/global/editor/ColumnComponent'
+import ImageComponent from '@/components/global/editor/ImageComponent'
 
 type MasterRecursiveComponentProps = {
     content: ContentItem,
@@ -113,6 +116,80 @@ const ContentRenderer: React.FC<ContentRendererProps> = React.memo((
             >
                 <Paragraph {...commonProps} />
             </motion.div>)
+        case 'table':
+            return (<motion.div
+            className='w-full h-full'
+            {...animationProps}
+            >
+                <TableComponent
+                ///{...commonProps} 
+                content={content.content as string[][]}
+                onChange={(newContent)=>onContentChange(content.id, newContent !== null ? newContent : '')}
+                isPreview={isPreview}
+                isEditable={isEditable}
+                initialRowSize={content.initialRows ?? 1}
+                initialColSize={content.initialColumns ?? 1}
+                />
+            </motion.div>)
+        case 'resizable-column':
+            if(Array.isArray(content.content)){
+                return (
+                    // <motion.div
+                    //     className={cn('w-full h-full', content.className)}
+                    //     {...animationProps}
+                    // >
+                    //     {(content.content as ContentItem[]).map((subItem:ContentItem, subIndex:number)=>(
+                    //         subItem.type === 'image' ? null :
+                    //         <MasterRecursiveComponent
+                    //             key={subItem.id || `item-${subIndex}`}
+                    //             content={subItem}
+                    //             onContentChange={onContentChange}
+                    //             isPreview={isPreview}
+                    //             isEditable={isEditable}
+                    //             slideId={slideId}
+                    //         />
+                    //     ))}
+                    // </motion.div>
+                    <motion.div
+                    {...animationProps}
+                    className='w-full h-full'
+                    >
+                        <ColumnComponent 
+                        content={content.content as ContentItem[]}
+                        className={content.className}
+                        onContentChange={onContentChange}
+                        slideId={slideId}
+                        isPreview={isPreview}
+                        isEditable={isEditable}
+                        />
+                    </motion.div>
+                )
+            }
+            return null
+        case 'image':
+            return(
+                <motion.div
+                {...animationProps}
+                className='w-full h-full'
+                >
+                    <ImageComponent 
+                    src={content.content as string}
+                    alt={content.placeholder || 'image'}
+                    className={content.className}
+                    contentId={content.id}
+                    onContentChange={onContentChange}
+                    isEditable={isEditable}
+                    />
+                </motion.div>
+            )
+
+        // case 'blockquote':
+        //     return (
+        //         <motion.div
+        //         {...animationProps}
+        //         className='w-full h-full'
+        //         >
+        //     )
         case 'column':
             if(Array.isArray(content.content)){
                 return (<motion.div

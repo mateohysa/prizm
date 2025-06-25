@@ -25,7 +25,7 @@ const CreatePage = ({onSelectOption}: Props) => {
             <h1 className='text-4xl font-bold text-primary'>
                 How would you like to get started?
             </h1>
-            <p className='text-secondary'>Choose your preferred method to begin.</p>
+            <p className='text-secondary'>Idea to presentation in a few clicks.</p>
         </motion.div>
         <motion.div variants={containerVariants} className='grid gap-6 md:grid-cols-3'>
             {CreatePageCard.map((option)=>(
