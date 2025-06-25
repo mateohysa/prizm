@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { useSlideStore } from '@/store/useSlideStore'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
-type Props = {}
+import { cn } from '@/lib/utils'
 
-const LayoutPreview = (props: Props) => {
+type Props = { hiddenOnMobile?: boolean }
+
+const LayoutPreview = ({ hiddenOnMobile = true }: Props) => {
     const {getOrderedSlides, reorderSlides} = useSlideStore()
     const slides = getOrderedSlides()
     const [loading, setLoading] = useState(true)
@@ -14,7 +16,13 @@ const LayoutPreview = (props: Props) => {
     }, [])
   return (
     <div
-    className='w-64 h-full fixed left-0 top-20 border-r  overflow-y-auto'
+    className={
+        cn(
+            // Hide below the `sm` breakpoint when mobile collapse is enabled
+            hiddenOnMobile ? 'hidden sm:block' : '',
+            'w-64 h-full fixed left-0 top-20 border-r overflow-y-auto'
+        )
+    }
     >
         <ScrollArea className='h-full w-full' suppressHydrationWarning>
             {loading ?  

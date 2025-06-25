@@ -3,8 +3,10 @@ import { useSlideStore } from '@/store/useSlideStore'
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Home, Play, Share } from 'lucide-react'
+import { Home, Play, Share, Menu } from 'lucide-react'
 import { toast } from 'sonner'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import LayoutPreview from '../editor-sidebar/LeftSidebar/LayoutPreview'
 
 type Props = {presentationId: string, presentationTitle: string}
 
@@ -27,21 +29,40 @@ const Navbar = ({presentationId, presentationTitle}: Props) => {
         //color: currentTheme.accentColor
     }}
     >
-        <Link href={`/dashboard`}
-        passHref
-        >
-            <Button
-            variant="outline"
-            className={`flex items-center gap-2`}
-            style={{
-                backgroundColor: currentTheme.backgroundColor,
-            }}
-            >
-                <Home className='w-4 h-4' />
-                <span className='hidden sm:inline'>Home</span>
+        {/* Left section */}
+        <div className='flex items-center gap-2'>
+            {/* Mobile: slide drawer trigger */}
+            <Sheet>
+                <SheetTrigger asChild>
+                    <Button
+                    variant="outline"
+                    className='sm:hidden'
+                    style={{ backgroundColor: currentTheme.backgroundColor }}
+                    >
+                        <Menu className='w-4 h-4' />
+                        <span className='sr-only'>Open slide preview</span>
+                    </Button>
+                </SheetTrigger>
+                <SheetContent side='left' className='p-0'>
+                    {/* Re-use the same preview list but keep it visible in the drawer */}
+                    <LayoutPreview hiddenOnMobile={false} />
+                </SheetContent>
+            </Sheet>
 
-            </Button>
-        </Link>
+            {/* Home link (hidden on xs) */}
+            <Link href={`/dashboard`} passHref>
+                <Button
+                variant="outline"
+                className={`hidden sm:flex items-center gap-2`}
+                style={{
+                    backgroundColor: currentTheme.backgroundColor,
+                }}
+                >
+                    <Home className='w-4 h-4' />
+                    <span className='hidden sm:inline'>Home</span>
+                </Button>
+            </Link>
+        </div>
         {/* HREF IS SUBJECT TO CHANGE */}
         <Link href={`/presentation/templatemarket`}
             className="text-lg font-semibold hidden sm:block"

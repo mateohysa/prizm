@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function timeAgo(timestamp: string) {
   const now = new Date()
-  const diffInSeconds = Math.floor(now.getTime() - new Date(timestamp).getTime() / 1000)
+  const diffInSeconds = Math.floor((now.getTime() - new Date(timestamp).getTime()) / 1000)
 
 
 
@@ -28,4 +28,11 @@ const intervals = [
     }
   }
   return 'just now'
+}
+
+// Truncate a string to a maximum length and append ellipsis if needed
+export function truncate(text: string, maxLength: number = 24) {
+  if (!text) return ""
+  if (text.length <= maxLength) return text
+  return text.slice(0, maxLength).trimEnd() + " ..."
 }

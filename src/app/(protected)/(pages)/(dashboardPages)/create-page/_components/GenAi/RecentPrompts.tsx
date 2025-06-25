@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { containerVariants, itemVariants } from '@/lib/constants'
-import { timeAgo } from '@/lib/utils'
+import { timeAgo, truncate } from '@/lib/utils'
 import usePromptStore from '@/store/usePromptStore'
 import { motion } from 'framer-motion'
 import React from 'react'
@@ -26,25 +26,28 @@ const RecentPrompts = (props: Props) => {
     }
   return (
     <motion.div variants={containerVariants} 
-    className='space-y-4 !mt-20'>
+    className='space-y-4 !mt-50'>
         <motion.h2 variants={itemVariants}
-        className='text-2xl font-semibold text-center'
+        className='text-lg font-semibold text-center'
         >
-            Your Recent Prompts
+            Your recent prompts
         </motion.h2>
         <motion.div variants={containerVariants}
-        className='space=y-2 w-full lg:max-w-[85%] mx-auto'
+        className='space=y-2 w-full lg:max-w-[65%] mx-auto'
         >
             {prompts.map((prompt, index) => (
                 <motion.div variants={itemVariants}
                 key={index}
+                className='pb-3'
                 >
                     <Card 
                     className='flex flex-row p-4 items-center justify-between hover:bg-accent/50 transition-colors duration-300'>
                         <div className='max-w-[70%]'>
-                            <h3 className='font-semibold text-xl line-clamp-1'>
-                                {prompt?.title}
-                                
+                            <h3
+                            className='font-semibold text-xl line-clamp-1'
+                            title={prompt?.title}
+                            >
+                                {truncate(prompt?.title)}
                             </h3>
                             <p className='font-semibold text-sm text-muted-foreground'>
                                 {timeAgo(prompt?.createdAt)}
