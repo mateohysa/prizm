@@ -10,6 +10,8 @@ import Paragraph from '@/components/global/editor/Paragraph'
 import TableComponent from '@/components/global/editor/TableComp'
 import ColumnComponent from '@/components/global/editor/ColumnComponent'
 import ImageComponent from '@/components/global/editor/ImageComponent'
+import BlockQuote from '@/components/global/editor/BlockQuote'
+import NumberedList from '@/components/global/editor/NumberedList'
 
 type MasterRecursiveComponentProps = {
     content: ContentItem,
@@ -183,13 +185,30 @@ const ContentRenderer: React.FC<ContentRendererProps> = React.memo((
                 </motion.div>
             )
 
-        // case 'blockquote':
-        //     return (
-        //         <motion.div
-        //         {...animationProps}
-        //         className='w-full h-full'
-        //         >
-        //     )
+        case 'blockquote':
+            return (
+                <motion.div
+                {...animationProps}
+                className={cn(`w-full h-full flex flex-col`, content.className)}
+                >
+                    <BlockQuote>
+                        <Paragraph {...commonProps} />
+                    </BlockQuote>
+                </motion.div>
+            )
+        case 'numberedList':
+            return(
+                <motion.div
+                {...animationProps}
+                className='w-full h-full'
+                >
+                    <NumberedList 
+                    items={content.content as string[]}
+                    onChange={(newItems)=>onContentChange(content.id, newItems)}
+                    className={content.className}
+                    />
+                </motion.div>
+            )
         case 'column':
             if(Array.isArray(content.content)){
                 return (<motion.div
