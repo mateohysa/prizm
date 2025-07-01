@@ -11,7 +11,11 @@ import TableComponent from '@/components/global/editor/TableComp'
 import ColumnComponent from '@/components/global/editor/ColumnComponent'
 import ImageComponent from '@/components/global/editor/ImageComponent'
 import BlockQuote from '@/components/global/editor/BlockQuote'
-import NumberedList from '@/components/global/editor/NumberedList'
+import { NumberedList, BulletList, TodoList } from '@/components/global/editor/NumberedList'
+import CalloutBox from '@/components/global/editor/CalloutBox'
+import CodeBlock from '@/components/global/editor/CodeBlock'
+import TableOfContents from '@/components/global/editor/TableOfContents'
+import Divider from '@/components/global/editor/Divider'
 
 type MasterRecursiveComponentProps = {
     content: ContentItem,
@@ -133,6 +137,44 @@ const ContentRenderer: React.FC<ContentRendererProps> = React.memo((
                 initialColSize={content.initialColumns ?? 1}
                 />
             </motion.div>)
+        case 'codeBlock':
+            return(
+                <motion.div
+                {...animationProps}
+                className='w-full h-full'   
+                >
+                    <CodeBlock
+                    code={content.code}
+                    language={content.language}
+                    onChange={(newCode)=>onContentChange(content.id, newCode)}
+                    className={content.className}
+                    />
+                </motion.div>
+            )
+        case 'tableOfContents':
+            return(
+                <motion.div
+                {...animationProps}
+                className='w-full h-full'
+                >
+                    <TableOfContents 
+                    items={content.content as string[]}
+                    onItemClick={(id)=>{
+                        console.log(`Navigate to section with id: ${id}`)
+                    }}
+                    className={content.className}
+                    />
+                </motion.div>
+            )
+        case 'divider':
+            return(
+                <motion.div
+                {...animationProps}
+                className='w-full h-full'
+                >
+                    <Divider className={content.className}/>
+                </motion.div>
+            )
         case 'resizable-column':
             if(Array.isArray(content.content)){
                 return (
@@ -204,9 +246,50 @@ const ContentRenderer: React.FC<ContentRendererProps> = React.memo((
                 >
                     <NumberedList 
                     items={content.content as string[]}
+                    onChange={(newItems: string[])=>onContentChange(content.id, newItems)}
+                    className={content.className}
+                    />
+                </motion.div>
+            )
+        case 'bulletList':
+            return (
+                <motion.div
+                {...animationProps}
+                className='w-full h-full'
+                >
+                    <BulletList
+                    items={content.content as string[]}
                     onChange={(newItems)=>onContentChange(content.id, newItems)}
                     className={content.className}
                     />
+                </motion.div>
+            )
+        case 'todoList':
+            return (
+                <motion.div
+                {...animationProps}
+                className='w-full h-full'
+                >
+                    <TodoList
+                    items={content.content as string[]}
+                    onChange={(newItems: string[])=>onContentChange(content.id, newItems)}
+                    className={content.className}
+                    />
+                </motion.div>  
+            )
+        case 'calloutBox':
+            return (
+                <motion.div
+                {...animationProps}
+                className='w-full h-full'
+                >
+                    <CalloutBox
+                    type={content.callOutType || 'info'}
+                    className={content.className}
+                    >
+                        <Paragraph {...commonProps} />
+                    </CalloutBox>
+                    
                 </motion.div>
             )
         case 'column':
