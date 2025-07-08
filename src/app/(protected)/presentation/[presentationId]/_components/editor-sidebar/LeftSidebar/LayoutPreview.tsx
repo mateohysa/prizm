@@ -3,6 +3,7 @@ import { useSlideStore } from '@/store/useSlideStore'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import DraggableSlidePreview from './DraggableSlidePreview'
 
 type Props = { hiddenOnMobile?: boolean }
 
@@ -10,6 +11,9 @@ const LayoutPreview = ({ hiddenOnMobile = true }: Props) => {
     const {getOrderedSlides, reorderSlides} = useSlideStore()
     const slides = getOrderedSlides()
     const [loading, setLoading] = useState(true)
+    const moveSlide = (dragIndex:number, hoverIndex:number) => {
+        reorderSlides(dragIndex, hoverIndex)
+    }
 
     useEffect(() => {
         if(typeof window !== 'undefined') setLoading(false)
@@ -20,7 +24,7 @@ const LayoutPreview = ({ hiddenOnMobile = true }: Props) => {
         cn(
             // Hide below the `sm` breakpoint when mobile collapse is enabled
             hiddenOnMobile ? 'hidden sm:block' : '',
-            'w-64 h-full fixed left-0 top-20 border-r overflow-y-auto'
+            'w-72 h-full fixed left-0 top-20 border-r overflow-y-auto'
         )
     }
     >
@@ -41,15 +45,14 @@ const LayoutPreview = ({ hiddenOnMobile = true }: Props) => {
                         {slides.length} slides
                     </span>
                 </div>
-                {/* TODO ADD DRAGGABLE SLIDE PREVIEW */}
-                {/* {slides.map((slide,index)=>(
+                {slides.map((slide,index)=>(
                     <DraggableSlidePreview
                     key={slide.id || index} 
                     slide={slide} 
                     index={index} 
                     moveSlide={moveSlide}
                     />
-                ))} */}
+                ))}
             </div>
             }
         </ScrollArea>

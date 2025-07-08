@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import Navbar from './_components/Navbar/Navbar'
 import LayoutPreview from './_components/editor-sidebar/LeftSidebar/LayoutPreview'
 import Editor from './_components/editor/Editor'
+import EditorSidebar from './_components/editor-sidebar/RightSidebar'
 
 type Props = {}
 
@@ -90,7 +91,7 @@ const Page = (props: Props) => {
         <div className='flex-1 sm:ml-64 pr-4 sm:pr-16'>
           <Editor isEditable={true} />
         </div>
-        
+        <EditorSidebar />
       </div>
     </DndProvider>
   )
