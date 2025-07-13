@@ -3,11 +3,12 @@ import React from 'react'
 import { useSlideStore } from '@/store/useSlideStore'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
-import { Component, LayoutTemplate, Type } from 'lucide-react'
+import { Component, LayoutTemplate, Palette, Type } from 'lucide-react'
 import LayoutPicker from './Tabs/LayoutPicker'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { component } from '@/lib/constants'
 import ComponentPreview from './Tabs/tab-components/ComponentPreview'
+import ThemeChanger from './Tabs/tab-components/ThemeChanger'
 
 type Props = {}
 
@@ -84,6 +85,28 @@ const EditorSidebar = (props: Props) => {
                             }
                         </div>
                     </ScrollArea>
+                    
+                </PopoverContent>
+            </Popover>
+
+
+            <Popover>
+                <PopoverTrigger asChild>
+                    <Button
+                    variant='ghost'
+                    size='icon'
+                    className='h-10 w-10 rounded-full'
+                    >
+                        <Palette className='w-5 h-5' />
+                        <span className='sr-only'>Change style</span>
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                side='left'
+                align='center'
+                className='w-80'
+                >
+                    <ThemeChanger />
                     
                 </PopoverContent>
             </Popover>
