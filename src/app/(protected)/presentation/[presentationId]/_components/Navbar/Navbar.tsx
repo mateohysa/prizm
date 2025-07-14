@@ -7,6 +7,7 @@ import { Home, Play, Share, Menu } from 'lucide-react'
 import { toast } from 'sonner'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import LayoutPreview from '../editor-sidebar/LeftSidebar/LayoutPreview'
+import PresentationMode from './PresentationMode'
 
 type Props = {presentationId: string, presentationTitle: string}
 
@@ -88,8 +89,10 @@ const Navbar = ({presentationId, presentationTitle}: Props) => {
                 <span className='hidden sm:inline'>Present</span>
             </Button>
         </div>
-        {/* TODO ADD PRESENTATION MODE */}
-        {/* {isPresentationMode && <PresentationMode />} */}
+
+        {isPresentationMode && <PresentationMode
+        onClose={() => setIsPresentationMode(false)}
+        />}
     </nav>
   )
 }
