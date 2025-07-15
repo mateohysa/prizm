@@ -19,8 +19,7 @@ type Props = {
 const UpperInfoBar = ({user}: Props) => {
   const { open } = useSidebar()
   return (
-    <header className={` sticky top-0 z-[10] flex shrink-0 flex-wrap items-center \
-      gap-2 border-b bg-background p-4 justify-between  duration-300 ease-in-out`}>
+    <header className={`sticky top-0 z-[10] flex shrink-0 flex-wrap items-center gap-2 border-b bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-sm backdrop-saturate-100 backdrop-contrast-100 border border-white/30 dark:border-white/10 p-4 justify-between duration-300 ease-in-out`}>
         
         
 

@@ -83,8 +83,8 @@ const ProjectCard = ({projectId,
     <motion.div
     variants={itemVariants}
     
-    className={`group w-full flex flex-col gap-y-3 rounded-xl p-3 border-2 transition-colors
-    ${!isDeleted && 'hover:bg-muted/50'}
+    className={`group w-full flex flex-col gap-y-3 rounded-xl p-3 border bg-white/60 dark:bg-white/10 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 border-white/30 dark:border-white/10 transition-colors
+    ${!isDeleted && 'hover:backdrop-blur-lg hover:bg-white/70 dark:hover:bg-white/15'}
     `}
     >
         <div className='relative aspect-[16/9] rounded-lg cursor-pointer overflow-hidden'

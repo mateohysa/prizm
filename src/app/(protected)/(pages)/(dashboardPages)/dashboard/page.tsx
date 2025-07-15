@@ -17,9 +17,6 @@ const DashboardPage = async () => {
             backdrop-blur-lg">
                 Projects
             </h1>
-            <p className="text-base font-normal dark:text-primary">
-                All of your work in one place
-            </p>
         </div>
       </div>
       {/* {Projects} */}

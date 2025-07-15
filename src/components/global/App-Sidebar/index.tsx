@@ -2,7 +2,7 @@
 import { Project } from '@/generated/prisma'
 import type { User } from '@/generated/prisma'
 import React from 'react'
-import { Sidebar, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
+import { Sidebar, useSidebar } from '@/components/ui/sidebar'
 import {
     SidebarContent,
     SidebarHeader,
@@ -19,20 +19,20 @@ const AppSidebarHeaderContent = () => {
   const { state } = useSidebar();
   return (
     <>
-      <SidebarMenuButton size={'lg'}
-      className='data-[state=open]:text-sidebar-accent-foreground'
-      >
+      <div className="flex items-center gap-2 cursor-default select-none">
         <div className='flex aspect-square size-8 items-center justify-center rounded-lg text-sidebar-primary-foreground'>
           <Avatar className="h-10 w-10 rounded-full">
-                    <AvatarImage
-                        src={'/prizm.png'}
-                        alt='Presix Logo'                  
-                        className="max-w-xs"
-                    />
+            <AvatarImage
+              src={'/prizm.png'}
+              alt='prizm Logo'
+              className="max-w-xs"
+            />
           </Avatar>
         </div>
-        {state === "expanded" && <span className='truncate text-primary text-3xl font-semibold'>presix</span>}
-        </SidebarMenuButton>
+        {state === "expanded" && (
+          <span className='truncate text-primary text-3xl font-semibold'>prizm</span>
+        )}
+      </div>
     </>
   );
 };
@@ -44,7 +44,7 @@ const AppSidebar = ({recentProjects, user, ...props}:
     return (
       <Sidebar collapsible='offcanvas'
       {...props}
-      className="max-w-[212px] bg-background-90 transition-all duration-300 ease-in-out">
+      className="max-w-[212px] bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 border border-white/30 dark:border-white/10 transition-all duration-300 ease-in-out">
         <SidebarHeader className="pt-6 px-3 pb-0">
           <AppSidebarHeaderContent />
         </SidebarHeader>  

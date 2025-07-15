@@ -18,7 +18,7 @@ const NavFooter = ({prismaUser}: {prismaUser: User}) => {
       <SidebarMenuItem>
         {/* Upgrade CTA hidden when sidebar is collapsed */}
         {!prismaUser.subscription && (
-          <div className="flex flex-col items-start p-2 pb-3 gap-2 bg-background-80 group-data-[collapsible=icon]:hidden ml-2 rounded-lg">
+          <div className="flex flex-col items-start p-2 pb-3 gap-2 bg-white/40 dark:bg-white/10 bg-clip-padding backdrop-blur-sm backdrop-saturate-100 backdrop-contrast-100 border border-white/20 dark:border-white/5 group-data-[collapsible=icon]:hidden ml-2 rounded-lg">
             <div className="flex flex-col items-start gap-1">
               <p className="text-base font-bold">
                 Get <span className="text-vivid">Creative AI</span>
@@ -31,8 +31,8 @@ const NavFooter = ({prismaUser}: {prismaUser: User}) => {
               className="w-full
               border
               border-vivid
-              bg-background-70
-              hover:bg-background-90
+              bg-white/30 dark:bg-white/10
+              hover:bg-white/40 dark:hover:bg-white/20
               text-primary
               rounded-xl
               font-bold"
