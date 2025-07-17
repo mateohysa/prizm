@@ -5,6 +5,7 @@ import { MasterRecursiveComponent } from '../editor/MasterRecursiveComponent'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 
+
 type Props = {
     onClose: () => void
 }
@@ -13,12 +14,16 @@ const PresentationMode = ({onClose}: Props) => {
     const {getOrderedSlides, currentTheme} = useSlideStore()
     const slides = getOrderedSlides()
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
+
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if(e.key === 'ArrowRight' || e.key === ' '){
                 setCurrentSlideIndex(currentSlideIndex + 1)
             }else if(e.key === 'ArrowLeft'){
                 setCurrentSlideIndex(currentSlideIndex - 1)
+            }else if(e.key === 'Escape'){
+                onClose()
             }
         }
         window.addEventListener('keydown', handleKeyDown)
@@ -26,6 +31,8 @@ const PresentationMode = ({onClose}: Props) => {
             window.removeEventListener('keydown', handleKeyDown)
         }
     },[slides.length, currentSlideIndex, onClose])
+
+
   return (
     <div className='fixed inset-0 bg-black flex items-center justify-center z-50'>
         <div
@@ -53,13 +60,17 @@ const PresentationMode = ({onClose}: Props) => {
                     fontFamily: currentTheme.fontFamily,
                 }}
                 >
-                    <MasterRecursiveComponent 
-                    content={slides[currentSlideIndex].content} 
-                    onContentChange={() => {}}
-                    slideId={slides[currentSlideIndex].id}
-                    isPreview={false}
-                    isEditable={false}
-                    />
+                    <div className='w-full h-full overflow-hidden'>
+                        {slides[currentSlideIndex] && (
+                            <MasterRecursiveComponent 
+                            content={slides[currentSlideIndex].content} 
+                            onContentChange={() => {}}
+                            slideId={slides[currentSlideIndex].id}
+                            isPreview={false}
+                            isEditable={false}
+                            />
+                        )}
+                    </div>
                 </motion.div>
             </AnimatePresence>
             <Button
