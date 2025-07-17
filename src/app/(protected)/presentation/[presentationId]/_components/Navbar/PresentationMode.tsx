@@ -19,9 +19,17 @@ const PresentationMode = ({onClose}: Props) => {
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if(e.key === 'ArrowRight' || e.key === ' '){
-                setCurrentSlideIndex(currentSlideIndex + 1)
+                if(currentSlideIndex === slides.length - 1) {
+                    onClose()
+                } else {
+                    setCurrentSlideIndex(currentSlideIndex + 1)
+                }
             }else if(e.key === 'ArrowLeft'){
-                setCurrentSlideIndex(currentSlideIndex - 1)
+                if(currentSlideIndex === 0) {
+                    onClose()
+                } else {
+                    setCurrentSlideIndex(currentSlideIndex - 1)
+                }
             }else if(e.key === 'Escape'){
                 onClose()
             }
@@ -85,16 +93,14 @@ const PresentationMode = ({onClose}: Props) => {
                 <Button
                 variant='outline'
                 size='icon'
-                onClick={() => setCurrentSlideIndex(currentSlideIndex - 1)}
-                disabled={currentSlideIndex === 0}  
+                onClick={() => currentSlideIndex === 0 ? onClose() : setCurrentSlideIndex(currentSlideIndex - 1)}
                 >
                     <ChevronLeft className='w-4 h-4' />
                 </Button>
                 <Button
                 variant='outline'
                 size='icon'
-                onClick={() => setCurrentSlideIndex(currentSlideIndex + 1)}
-                disabled={currentSlideIndex === slides.length - 1}  
+                onClick={() => currentSlideIndex === slides.length - 1 ? onClose() : setCurrentSlideIndex(currentSlideIndex + 1)}
                 >
                     
                         <ChevronRight className='w-4 h-4' />
