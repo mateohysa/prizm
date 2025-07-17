@@ -14,6 +14,8 @@ import { MasterRecursiveComponent } from './MasterRecursiveComponent'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { EllipsisVertical, Trash } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useCallback } from 'react'
+import { updateSlides } from '@/actions/project'
 
 
 interface DropzoneProps {
@@ -59,11 +61,7 @@ export const Dropzone:React.FC<DropzoneProps> = ({
 
   return (
     <div
-    ref={(node) => {
-        if (node) {
-            dropRef(node)
-        }
-    }}
+    ref={dropRef as unknown as React.LegacyRef<HTMLDivElement>}
     className={cn(
         'h-4 my-2 rounded-md transition-all duration-200',
         isOver && canDrop ? 'border-green-500 bg-green-100' : 'border-gray-300',
@@ -108,6 +106,25 @@ export const DraggableSlide:React.FC<DraggableSlideProps> = (
         }),
         canDrag: isEditable,
     })
+
+    const [_, drop] = useDrop({
+        accept: ['SLIDE','LAYOUT'],
+        hover(item:{index:number; type:string}){
+            if(!ref.current || !isEditable) return
+            const dragIndex = item.index
+            const hoverIndex = index
+
+            if(item.type === 'SLIDE'){
+                if(dragIndex === hoverIndex){
+                    return
+                }
+                moveSlide(dragIndex, hoverIndex)
+                item.index = hoverIndex
+            }
+        }
+    })
+    drag(drop(ref))
+
     const handleContentChange = (contentId: string, newContent: string | string[] | string[][]) => {
         if(isEditable){
             updateContentItem(slide.id, contentId, newContent)
@@ -123,7 +140,7 @@ export const DraggableSlide:React.FC<DraggableSlideProps> = (
             'w-full rounded-lg shadow-lg relative p-0',
             'shadow-xl transition-shadow duration-300',
             'overflow-hidden flex flex-col',
-            'min-h-[160px] sm:min-h-[220px] md:min-h-[300px] lg:min-h-[400px]',
+            'aspect-[16/9]',
             index === currentSlide ? 'ring-2 ring-blue-500 ring-offset-2' : '',
             slide.className,
             isDragging ? 'opacity-50' : 'opacity-100'
@@ -182,6 +199,7 @@ const Editor = ({ isEditable }: Props) => {
     // Keep a ref to each slide container so we can auto-scroll the selected slide into view
     const slideRefs = useRef<(HTMLDivElement | null)[]>([])
     const [loading, setLoading] = useState(true)
+    const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
 
     const moveSlide = (dragIndex: number, hoverIndex: number) => {
         if(isEditable){
@@ -229,6 +247,26 @@ const Editor = ({ isEditable }: Props) => {
         if(typeof window !== 'undefined') setLoading(false)
     }, [])
 
+    const saveSlides = useCallback(()=>{
+        if(!isEditable && project){
+            ;(async()=> {
+                await updateSlides(project.id, JSON.parse(JSON.stringify(slides)))
+            })()
+        }
+        //TODO ADD A SMOOTHER INDICATION OF SAVING
+    }, [isEditable, slides, project])
+    useEffect(()=>{
+        if(autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
+
+        if(isEditable){
+            autoSaveTimerRef.current = setTimeout(()=>{
+            }, 2000)
+        }
+        return ()=>{
+            if(autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
+        }
+    }, [slides, isEditable, project])
+
     return (
         <div
         className='flex-1 flex flex-col h-full max-w-3xl mx-auto px-4 mb-20'
@@ -258,6 +296,11 @@ const Editor = ({ isEditable }: Props) => {
                                 handleDelete={handleDelete}
                                 isEditable={isEditable}
                             />
+                            <Dropzone
+                            index={index + 1} // TODO: replace with dynamic index if needed
+                            onDrop={handleDrop}
+                            isEditable={isEditable}
+                        />
                         </React.Fragment>
                     ))}
                 </div>

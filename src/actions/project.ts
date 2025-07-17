@@ -3,7 +3,8 @@
 import { AArrowDown } from "lucide-react"
 import { onAuthenticateUser } from "./user"
 import { client } from "@/lib/prisma"
-import { OutlineCard } from "@/lib/types"
+import { OutlineCard, Slide } from "@/lib/types"
+import { JsonValue } from "@prisma/client/runtime/library"
 
 /**
  * Fetch all projects
@@ -197,5 +198,50 @@ export const getProjectById = async (projectId: string) => {
     }catch(error){
         console.error("❌ ERROR:", error)
         return {status: 500, error: "Internal server error when finding project (outer)"}
+    }
+}
+export const updateSlides = async (projectId: string, slides: JsonValue[]) => {
+    try{
+        if(!projectId || !slides){
+            return {status: 400, error: "Project ID and slides are required"}
+        }
+        const updatedProject = await client.project.update({
+            where: {
+                id: projectId,
+            },
+            data: {
+                slides: slides
+            },
+        })
+        if(!updatedProject){
+            return {status: 500, error: "Failed to update slides"}
+        }
+        return {status: 200, data:updatedProject}
+    }catch(error){
+        console.error("❌ ERROR:", error)
+        return {status: 500, error: "Internal server error when updating slides from the editor"}
+    }
+}
+
+export const updateProjectTheme = async (projectId: string, theme: string) => {
+    try{
+        if(!projectId || !theme){
+            return {status: 400, error: "Project ID and theme are required"}
+        }
+        const updatedProject = await client.project.update({
+            where: {
+                id: projectId,
+            },
+            data: {
+                themeName: theme,
+            }
+        })
+        if(!updatedProject){
+            return {status: 500, error: "Failed to update project theme"}
+        }
+        return {status: 200, data: updatedProject}
+    }catch(error){
+        console.error("❌ ERROR:", error)
+        return {status: 500, error: "Internal server error when updating project theme"}
     }
 }
