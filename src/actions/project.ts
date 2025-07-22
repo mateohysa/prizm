@@ -245,3 +245,75 @@ export const updateProjectTheme = async (projectId: string, theme: string) => {
         return {status: 500, error: "Internal server error when updating project theme"}
     }
 }
+
+
+export const deleteAllProjects = async (projectIds: string[]) => {
+    try {
+        const checkUser = await onAuthenticateUser()
+        if(checkUser.status !== 200 || !checkUser.user){
+            return {status: 403, error: "User not authenticated"}
+        }
+        if(!Array.isArray(projectIds) || projectIds.length === 0){
+            return {status: 400, error: "No project IDs provided to delete"}
+        }
+
+        const userId = checkUser.user.id
+        const projectsToDelete = await client.project.findMany({
+            where: {
+                id: {in: projectIds},
+                userId: userId,
+            },
+        })
+        if(projectsToDelete.length === 0){
+            return {
+                status: 400,
+                error: "No projects to delete",
+            }
+        }
+
+        const deletedProjects = await client.project.deleteMany({
+            where: {
+                id: {in: projectsToDelete.map((project) => project.id)},
+            },
+        })
+        
+        return{
+            status: 200,
+            message: `${deletedProjects.count} projects deleted successfully`
+        }
+    } catch (error) {
+        console.error("❌ ERROR:", error)
+        return {
+            status: 500,
+            error: "Internal server error when deleting all projects (outer)",
+        }
+    }
+}
+
+export const getDeletedProjects = async () => {
+     try {
+        const checkUser = await onAuthenticateUser()
+        if(checkUser.status !== 200 || !checkUser.user){
+            return {status: 403, error: "User not authenticated"}
+        }
+        const projects = await client.project.findMany({
+            where: {
+                userId: checkUser.user.id,
+                isDeleted: true,
+            },
+            orderBy: {
+                updatedAt: "desc",
+            }
+        })
+        if(projects.length === 0){
+            return {status: 400 , error: "No deleted projects found", data: []}
+        }
+        return {status: 200, data: projects}
+     } catch (error) {
+        console.error("❌ ERROR:", error)
+        return {
+            status: 500,
+            error: "Internal server error when getting deleted projects"
+        }
+     }
+}

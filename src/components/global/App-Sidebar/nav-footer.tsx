@@ -5,6 +5,7 @@ import { User } from '@/generated/prisma'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { buySubscription } from '@/actions/lemonSqueezy'
 
 const NavFooter = ({prismaUser}: {prismaUser: User}) => {
     const {isLoaded, isSignedIn, user} = useUser()
@@ -12,6 +13,17 @@ const NavFooter = ({prismaUser}: {prismaUser: User}) => {
     const router = useRouter()
 
     if(!isLoaded || !isSignedIn) return null
+
+    const handleUpgrade = async () => {
+      setLoading(true)
+      try{
+         const res = await buySubscription(prismaUser.id)
+      } 
+      catch(error){
+
+      }
+
+    }
 
   return (
     <SidebarMenu>
@@ -38,7 +50,7 @@ const NavFooter = ({prismaUser}: {prismaUser: User}) => {
               font-bold"
               variant="outline"
               size={'lg'}
-              // onClick={handleUpgradig}
+              onClick={handleUpgradig}
             >
               {loading ? 'Upgrading...' : 'Upgrade'}
             </Button>
