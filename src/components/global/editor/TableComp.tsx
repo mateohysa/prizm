@@ -24,10 +24,33 @@ const TableComp = ({
     const {currentTheme} = useSlideStore()
 
     const [tableData, setTableData] = useState<string[][]>(()=>{
-        if(content.length == 0 || content[0].length == 0){
-            return Array(initialRowSize).fill(Array(initialColSize).fill(''))
+        // More robust validation
+        const hasValidContent = content && 
+            Array.isArray(content) && 
+            content.length > 0 && 
+            Array.isArray(content[0]) && 
+            content[0].length > 0;
+
+        if (!hasValidContent) {
+            // Ensure we have valid dimensions
+            const rows = Math.max(1, initialRowSize || 1);
+            const cols = Math.max(1, initialColSize || 1);
+            
+            // Create independent arrays with validation
+            return Array(rows).fill(null).map(() => 
+                Array(cols).fill('')
+            );
         }
-        return content
+        
+        // Validate that content is actually a 2D string array
+        if (!Array.isArray(content) || !content.every(row => Array.isArray(row))) {
+            console.warn('Invalid content passed to TableComp, falling back to default:', content);
+            const rows = Math.max(1, initialRowSize || 1);
+            const cols = Math.max(1, initialColSize || 1);
+            return Array(rows).fill(null).map(() => Array(cols).fill(''));
+        }
+        
+        return content;
     })
 
     const [rowSize, setRowSize] = useState<number[]>([])
@@ -58,12 +81,22 @@ const TableComp = ({
     const handleChange = (row: number, col: number, value: string) => {}
   
   if(isPreview){
+    // Add comprehensive validation before rendering
+    if (!tableData || !Array.isArray(tableData) || tableData.length === 0) {
+        return <div className="w-full text-center p-4">No table data available</div>;
+    }
+
+    const firstRow = tableData[0];
+    if (!firstRow || !Array.isArray(firstRow)) {
+        return <div className="w-full text-center p-4">Invalid table structure</div>;
+    }
+
     return (
         <div className='w-full overflow-x-auto text-xs'>
         <table className='w-full'>
             <thead>
                 <tr>
-                    {tableData[0].map((cell, index)=> (
+                    {firstRow.map((cell, index)=> (
                         <th key={index} className='border p-2'
                         style={{width: `${colSize[index]}%`  }}
                         >
