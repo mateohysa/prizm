@@ -30,8 +30,8 @@ const UpperInfoBar = ({user}: Props) => {
         <ThemeSwitcher />
         <div className='flex flex-wrap gap-4 items-center justify-end'>
           <Button
-          className='bg-primary-80 rounded-lg hover:bg-background-80 text-primary font-semibold
-          cursor-not-allowed'>
+          className='bg-primary-80 rounded-lg hover:bg-background-80 text-primary font-semibold cursor-not-allowed'
+          title="Coming soon">
             <Upload />
             Import
           </Button>

@@ -10,6 +10,7 @@ import AlertDialogBox from '../alert-dialog'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { deleteProject, recoverProject } from '@/actions/project'
+import { Trash2 } from 'lucide-react'
 type Props = {
     projectId: string
     title: string
@@ -140,7 +141,7 @@ const ProjectCard = ({projectId,
                         className='bg-background-80 dark:hover:bg-background-90'
                         disabled={loading}
                         >
-                            Delete
+                            <Trash2 className='w-4 h-4' />
                         </Button>
                     </AlertDialogBox> 
                     }
