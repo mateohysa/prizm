@@ -18,8 +18,8 @@ const SearchBar = () => {
       </Button>
       <Input
         type='text'
-        placeholder='Search'
-        className='flex-grow bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 ml-6  rounded-xl'
+        // placeholder='Search'
+        className='flex-grow bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-xl'
       />
     </div>
   ) 

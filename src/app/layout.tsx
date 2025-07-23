@@ -6,11 +6,11 @@ import { dark } from "@clerk/themes";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "Presix",
+  title: "prizm",
   icons: {
     icon: '/prizm.png',
   },
-  description: "Presix transforms your text into slides through AI.",
+  description: "prizm transforms your text into slides through AI.",
 };
 
 export default function RootLayout({
