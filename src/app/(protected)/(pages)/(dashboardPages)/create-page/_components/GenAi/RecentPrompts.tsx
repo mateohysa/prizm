@@ -40,8 +40,9 @@ const RecentPrompts = (props: Props) => {
                 key={index}
                 className='pb-3'
                 >
-                    <Card 
-                    className='flex flex-row p-4 items-center justify-between hover:bg-accent/50 transition-colors duration-300'>
+                    <div className='bg-white/30 dark:bg-white/10 rounded-xl p-[1px] shadow-lg shadow-black/10 border border-gray-200 dark:border-transparent'>
+                        <Card 
+                        className='flex flex-row p-4 items-center justify-between bg-white/40 dark:bg-white/5 backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 bg-clip-padding border-0 rounded-[11px] hover:bg-accent/50 transition-colors duration-300'>
                         <div className='max-w-[70%]'>
                             <h3
                             className='font-semibold text-xl line-clamp-1'
@@ -60,12 +61,13 @@ const RecentPrompts = (props: Props) => {
                         <Button
                         variant='default'
                         size='sm'
-                        className='rounded-xl bg-primary-20 dark:hover:bg-gray-700 hover:bg-gray-200 text-primary'
+                        className='rounded-xl bg-primary-20 dark:hover:bg-white/20 hover:bg-gray-200 text-primary'
                         onClick={()=> handleEdit(prompt?.id)}
                         >
                             Edit
                         </Button>
                     </Card>
+                    </div>
                 </motion.div>
              ))} 
         </motion.div>

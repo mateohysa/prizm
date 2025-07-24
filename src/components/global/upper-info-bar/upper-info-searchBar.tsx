@@ -19,7 +19,7 @@ const SearchBar = () => {
       <Input
         type='text'
         // placeholder='Search'
-        className='flex-grow bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-xl'
+        className='flex-grow bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-xl pl-12'
       />
     </div>
   ) 

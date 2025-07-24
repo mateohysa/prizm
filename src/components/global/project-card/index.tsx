@@ -137,7 +137,7 @@ const ProjectCard = ({projectId,
                         <Button
                         size='sm'
                         variant='ghost'
-                        className='bg-background-80 dark:hover:bg-background-90'
+                        className='bg-background-80 dark:hover:bg-background-300'
                         disabled={loading}
                         >
                             <Trash2 className='w-4 h-4' />

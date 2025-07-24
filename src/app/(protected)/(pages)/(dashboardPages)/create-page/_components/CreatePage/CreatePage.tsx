@@ -43,11 +43,11 @@ const CreatePage = ({onSelectOption}: Props) => {
                 className={`${
                     option.highlight
                     ? 'bg-vivid-gradient'
-                    : 'hover:bg-vivid-gradient border'
-                } rounded-xl p-[1px] transition-all duration-300 ease-in-out cursor-pointer`}
+                    : 'bg-white/30 dark:bg-white/10'
+                } rounded-xl p-[1px] transition-all duration-300 ease-in-out cursor-pointer shadow-lg shadow-black/10 border border-gray-200 dark:border-transparent`}
                 >
                     <motion.div
-                    className='w-full p-4 flex flex-col items-start bg-white dark:bg-black rounded-xl'
+                    className={`w-full p-4 flex flex-col items-start backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 bg-clip-padding border-0 rounded-[11px] ${option.highlight ? 'bg-white/90 dark:bg-gray-900/90' : 'bg-white/40 dark:bg-white/5'}`}
                     whileHover={{
                         transition: {
                             duration:0.1
