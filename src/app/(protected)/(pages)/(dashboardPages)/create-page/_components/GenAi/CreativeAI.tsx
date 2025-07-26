@@ -139,7 +139,7 @@ const CreateAI = ({onBack}: Props) => {
         </motion.div>
         <motion.div
         variants={itemVariants}
-        className='bg-primary/10 p-4 rounded-xl'
+        className='bg-white/40 dark:bg-white/5 backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 bg-clip-padding border border-white/30 dark:border-white/10 p-4 rounded-xl'
         >
             <div
             className='flex flex-col sm:flex-row justify-between gap-3 items-center rounded-xl'

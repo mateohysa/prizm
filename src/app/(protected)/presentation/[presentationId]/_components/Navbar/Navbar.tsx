@@ -24,11 +24,7 @@ const Navbar = ({presentationId, presentationTitle}: Props) => {
 
   return (
     <nav
-    className='fixed top-0 left-0 right-0 z-50 w-full h-20 flex justify-between items-center py-4 px-7 border-b'
-    style={{backgroundColor: 
-        currentTheme.navbarColor || currentTheme.backgroundColor,
-        //color: currentTheme.accentColor
-    }}
+    className='fixed top-0 left-0 right-0 z-50 w-full h-20 flex justify-between items-center py-4 px-7 border-b bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-sm backdrop-saturate-100 backdrop-contrast-100 border border-white/30 dark:border-white/10 duration-300 ease-in-out'
     >
         {/* Left section */}
         <div className='flex items-center gap-2'>
@@ -38,7 +34,6 @@ const Navbar = ({presentationId, presentationTitle}: Props) => {
                     <Button
                     variant="outline"
                     className='sm:hidden'
-                    style={{ backgroundColor: currentTheme.backgroundColor }}
                     >
                         <Menu className='w-4 h-4' />
                         <span className='sr-only'>Open slide preview</span>
@@ -55,9 +50,6 @@ const Navbar = ({presentationId, presentationTitle}: Props) => {
                 <Button
                 variant="outline"
                 className={`hidden sm:flex items-center gap-2`}
-                style={{
-                    backgroundColor: currentTheme.backgroundColor,
-                }}
                 >
                     <Home className='w-4 h-4' />
                     <span className='hidden sm:inline'>Home</span>
@@ -66,13 +58,10 @@ const Navbar = ({presentationId, presentationTitle}: Props) => {
         </div>
         {/* HREF IS SUBJECT TO CHANGE */}
         <Link href={`/presentation/templatemarket`}
-            className="text-lg font-semibold hidden sm:block"
+            className="text-lg font-semibold hidden sm:block text-foreground"
         >{presentationTitle}</Link>
         <div className='flex items-center gap-4'>
             <Button 
-            style={{
-                backgroundColor: currentTheme.backgroundColor,
-            }}
             variant="outline"
             onClick={handleCopy}
             >

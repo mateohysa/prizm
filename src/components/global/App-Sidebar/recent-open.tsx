@@ -39,7 +39,7 @@ const RecentOpen = ({recentProjects}: Props) => {
           <SidebarMenuButton 
           asChild 
           tooltip={item.title}
-          className="hover:bg-primary-80">
+          className="hover:bg-primary-80 border border-gray-200 dark:border-transparent">
   
             <Button 
             variant={'link'}

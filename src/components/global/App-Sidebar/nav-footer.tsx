@@ -34,7 +34,7 @@ const NavFooter = ({prismaUser}: {prismaUser: User}) => {
       <SidebarMenuItem>
         {/* Upgrade CTA hidden when sidebar is collapsed */}
         {!prismaUser.subscription && (
-          <div className="flex flex-col items-start p-2 pb-3 gap-2 bg-white/40 dark:bg-white/10 bg-clip-padding backdrop-blur-sm backdrop-saturate-100 backdrop-contrast-100 border border-white/20 dark:border-white/5 group-data-[collapsible=icon]:hidden ml-2 rounded-lg">
+          <div className="flex flex-col items-start p-2 pb-3 gap-2 bg-white/40 dark:bg-white/10 bg-clip-padding backdrop-blur-sm backdrop-saturate-100 backdrop-contrast-100 border border-white/20 dark:border-white/5 group-data-[collapsible=icon]:hidden ml-2 rounded-lg shadow-lg shadow-black/10">
             <div className="flex flex-col items-start gap-1">
               <p className="text-base font-bold">
                 Get <span className="text-vivid">Creative AI</span>
@@ -65,8 +65,8 @@ const NavFooter = ({prismaUser}: {prismaUser: User}) => {
           <SidebarMenuButton
             size="lg"
             tooltip={user?.fullName || ''}
-            className="data-[state=open]:bg-transparent hover:bg-transparent hover:text-foreground active:bg-transparent "
-            onClick={() => console.log("User profile clicked")}
+            className="data-[state=open]:bg-white/60 dark:bg-white/10 hover:bg-white/70 dark:hover:bg-white/15 hover:text-foreground active:bg-white/60 dark:active:bg-white/10 shadow-lg shadow-black/10 border border-gray-200 dark:border-transparent bg-white/60 dark:bg-white/10 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100"
+
           >
             <UserButton />
             <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">

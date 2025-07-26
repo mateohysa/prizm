@@ -84,7 +84,7 @@ const ProjectCard = ({projectId,
     <motion.div
     variants={itemVariants}
     
-    className={`group w-full flex flex-col gap-y-3 rounded-xl p-3 border bg-white/60 dark:bg-white/10 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 border-white/30 dark:border-white/10 transition-colors
+    className={`group w-full flex flex-col gap-y-3 rounded-xl p-3 border bg-white/60 dark:bg-white/10 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 shadow-lg shadow-black/10 border-gray-200 dark:border-transparent transition-colors
     ${!isDeleted && 'hover:backdrop-blur-lg hover:bg-white/70 dark:hover:bg-white/15'}
     `}
     >
@@ -137,7 +137,7 @@ const ProjectCard = ({projectId,
                         <Button
                         size='sm'
                         variant='ghost'
-                        className='bg-background-80 dark:hover:bg-background-90'
+                        className='bg-background-80 dark:hover:bg-background-300'
                         disabled={loading}
                         >
                             <Trash2 className='w-4 h-4' />

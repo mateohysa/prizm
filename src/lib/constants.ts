@@ -1,4 +1,4 @@
-import { Home, BookTemplate, Trash, Settings, Book } from "lucide-react";
+import { LayoutDashboard, BookTemplate, Trash, Settings, Book } from "lucide-react";
 import {
   BlankCard,
   AccentLeft,
@@ -52,9 +52,9 @@ export const data = {
 
   navMain: [
     {
-      title: "Home",
+      title: "Dashboard",
       url: "/dashboard",
-      icon: Home,
+      icon: LayoutDashboard,
     },
     {
       title: "Templates",
@@ -78,7 +78,7 @@ export const CreatePageCard = [
   {
     title: "Use a",
     highlightedText: "Template",
-    description: "Write a prompt and leave everything else for us to handle",
+    description: "Pick one of our carefully crafted templates.",
     type: "template",
   },
   {
@@ -91,7 +91,7 @@ export const CreatePageCard = [
   {
     title: "Start from",
     highlightedText: "Scratch",
-    description: "Write a prompt and leave everything else for us to handle",
+    description: "Decide the outlines and let Creative AI handle the rest.",
     type: "create-scratch",
   },
 ];

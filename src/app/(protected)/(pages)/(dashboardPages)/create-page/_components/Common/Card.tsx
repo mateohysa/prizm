@@ -56,7 +56,7 @@ const Card = ({
         onDragOver={onDragOver}
         {...dragHandlers}
         >
-            <UICard className={`p-4 cursor-grab active:cursor-grabbing bg-primary-90 
+            <UICard className={`p-4 cursor-grab active:cursor-grabbing bg-white/40 dark:bg-white/5 backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 bg-clip-padding border border-white/30 dark:border-white/10 
                 ${isEditing || isSelected ? "border-primary bg-transparent" : ""}`}
                 onClick={onCardClick}
                 onDoubleClick={onCardDoubleClick}
