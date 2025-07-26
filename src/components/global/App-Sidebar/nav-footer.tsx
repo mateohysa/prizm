@@ -65,8 +65,8 @@ const NavFooter = ({prismaUser}: {prismaUser: User}) => {
           <SidebarMenuButton
             size="lg"
             tooltip={user?.fullName || ''}
-            className="data-[state=open]:bg-transparent hover:bg-transparent hover:text-foreground active:bg-transparent shadow-lg shadow-black/10 border border-gray-200 dark:border-transparent"
-            onClick={() => console.log("User profile clicked")}
+            className="data-[state=open]:bg-white/60 dark:bg-white/10 hover:bg-white/70 dark:hover:bg-white/15 hover:text-foreground active:bg-white/60 dark:active:bg-white/10 shadow-lg shadow-black/10 border border-gray-200 dark:border-transparent bg-white/60 dark:bg-white/10 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100"
+
           >
             <UserButton />
             <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">

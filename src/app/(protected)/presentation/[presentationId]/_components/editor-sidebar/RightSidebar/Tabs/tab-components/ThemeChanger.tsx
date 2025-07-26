@@ -23,7 +23,6 @@ const ThemeChanger = (
             })
             return
         }
-        setTheme(theme.type)
         setCurrentTheme(theme)
 
         try{
