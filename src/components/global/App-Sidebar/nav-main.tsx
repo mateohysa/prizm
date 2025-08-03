@@ -1,6 +1,6 @@
 "use client"
 import { SidebarGroup, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 
@@ -18,6 +18,11 @@ const NavMain = ({items}: {items:{
 }) => {
     const pathname = usePathname()
     const { state } = useSidebar()
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
   return (
       <SidebarGroup className="p-0">
@@ -29,7 +34,8 @@ const NavMain = ({items}: {items:{
                     className = {`text-lg ${pathname.includes(item.url) && "font-bold"}`}>
                     
                     <item.icon className="text-lg" />
-                    {state === "expanded" && <span>{item.title}</span>}
+                    {/* Only show title when mounted and expanded to prevent hydration issues */}
+                    {mounted && state === "expanded" && <span>{item.title}</span>}
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>))}
