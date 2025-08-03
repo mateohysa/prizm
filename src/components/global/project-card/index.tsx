@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { deleteProject, recoverProject } from '@/actions/project'
 import { Trash2 } from 'lucide-react'
+import { Slide } from '@/lib/types'
 type Props = {
     projectId: string
     title: string
@@ -32,8 +33,13 @@ const ProjectCard = ({projectId,
         const {setSlides} = useSlideStore()
         const router = useRouter()
         const handleNavigation = () => {
-            setSlides(JSON.parse(JSON.stringify(slideData)))
-            router.push(`/presentation/${projectId}`)
+            if (slideData && Array.isArray(slideData)) {
+                const slides = slideData as unknown as Slide[]
+                setSlides(slides) // Remove JSON.parse(JSON.stringify())
+                router.push(`/presentation/${projectId}`)
+            } else {
+                console.warn('Invalid slide data for project:', projectId)
+            }
         }
         const theme = themes.find((theme) => theme.name === themeName) || themes[0]
         

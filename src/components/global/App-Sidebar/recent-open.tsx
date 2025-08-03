@@ -1,5 +1,5 @@
 "use client"
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Project } from '@/generated/prisma'
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
 import { Button } from '@/components/ui/button'
@@ -7,6 +7,7 @@ import { JsonValue } from '@/generated/prisma/runtime/library'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useSlideStore } from '@/store/useSlideStore'
+import { Slide } from '@/lib/types'
 
 
 type Props = {
@@ -15,53 +16,52 @@ type Props = {
 const RecentOpen = ({recentProjects}: Props) => {
   const router = useRouter()
   const { setSlides } = useSlideStore()
+  const [mounted, setMounted] = useState(false)
 
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
-  const handleRecentOpenClick  = (projectId: string, slides:JsonValue) => {
-    if(!projectId || !slides){
-      toast.error('Project not found',
-        {
-        description: 'Please try again',
-      })
-      return
-    }
-    setSlides(JSON.parse(JSON.stringify(slides)))
-    router.push(`/presentation/${projectId}`)
+  // Don't render anything until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return null
   }
+
+  if (recentProjects.length === 0) {
+    return null
+  }
+
   return (
-    recentProjects.length > 0 ? (
-      <SidebarGroup className="p-0">
+    <SidebarGroup className="p-0">
       <SidebarGroupLabel>
         Recently Opened
       </SidebarGroupLabel>
-      <SidebarMenu>{recentProjects.length > 0 ? (
-        recentProjects.map((item) => (<SidebarMenuItem key={item.id}>
-          <SidebarMenuButton 
-          asChild 
-          tooltip={item.title}
-          className="hover:bg-primary-80 border border-gray-200 dark:border-transparent">
-  
-            <Button 
-            variant={'link'}
-            onClick={() => handleRecentOpenClick(item.id, item.slides)}
-            className='text-xs items-center justify-start'
+      <SidebarMenu>
+        {recentProjects.map((item) => (
+          <SidebarMenuItem key={item.id}>
+            <SidebarMenuButton 
+              asChild 
+              tooltip={item.title}
+              className="hover:bg-primary-80 border border-gray-200 dark:border-transparent"
             >
-              <span>{item.title}</span>
-            </Button>
-          </SidebarMenuButton>
-        </SidebarMenuItem>))
-      ):
-      (
-         ''
-         )}
-        
+              <Button 
+                variant={'link'}
+                onClick={() => {
+                    if (item.slides && Array.isArray(item.slides)) {
+                        const slides = item.slides as unknown as Slide[]
+                        setSlides(slides)
+                        router.push(`/presentation/${item.id}`)
+                    }
+                }}
+                className='text-xs items-center justify-start'
+              >
+                <span>{item.title}</span>
+              </Button>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        ))}
       </SidebarMenu>
     </SidebarGroup>
-    )
-    :
-    (
-     ''
-    )
   )
 }
 

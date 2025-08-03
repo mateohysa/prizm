@@ -8,6 +8,7 @@ import { Loader2, Wand2 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
+import { Slide } from '@/lib/types'
 
 type Props = {
     selectedTheme: Theme,
@@ -35,13 +36,12 @@ const ThemePicker = ({selectedTheme, themes, onThemeSelect}: Props) => {
         try{
             const res = await generateLayouts(params.presentationId as string, currentTheme.name)
 
-            if(res.status === 200 && !res?.data){
-                throw new Error("Failed to generate layouts")
+            if(res.status === 200) {
+                setSlides(res.data as unknown as Slide[])
             }
             toast.error("Success!" , {description: "Layouts generated successfully"})
 
             router.push(`/presentation/${project?.id}`)
-            setSlides(res.data)
         }catch(error){
             toast.error("Error!" , {description: "Failed to generate layouts"})
         }finally{
