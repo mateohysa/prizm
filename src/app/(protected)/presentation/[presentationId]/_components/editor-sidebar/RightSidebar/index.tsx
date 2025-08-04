@@ -18,7 +18,7 @@ const EditorSidebar = (props: Props) => {
     <div
     className='fixed top-1/2 right-0 transform -translate-y-1/2 z-10'
     >
-        <div className='rounded-xl border-r-0 border border-backgorund-70 shadow-lg p-2 flex flex-col items-center space-y-4'>
+        <div className='rounded-xl p-2 flex flex-col items-center space-y-4 bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 shadow-lg'>
             <Popover>
                 <PopoverTrigger asChild>
                     <Button
@@ -33,7 +33,7 @@ const EditorSidebar = (props: Props) => {
                 <PopoverContent
                 side='left'
                 align='center'
-                className='w-[480px] p-0'
+                className='w-[480px] p-0 bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 border border-white/30 dark:border-white/10'
                 >
                     <LayoutPicker />
                     
@@ -55,9 +55,8 @@ const EditorSidebar = (props: Props) => {
                 <PopoverContent
                 side='left'
                 align='center'
-                className='w-[480px] p-0'
+                className='w-[480px] p-0 bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 border border-white/30 dark:border-white/10'
                 style={{
-                    backgroundColor: currentTheme.slideBackgroundColor,
                     color: currentTheme.fontColor,
                 }}
                 >
@@ -104,7 +103,7 @@ const EditorSidebar = (props: Props) => {
                 <PopoverContent
                 side='left'
                 align='center'
-                className='w-80'
+                className='w-80 bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 border border-white/30 dark:border-white/10'
                 >
                     <ThemeChanger />
                     

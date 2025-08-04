@@ -25,9 +25,8 @@ export const DraggableLayoutItem = ({
     <div ref={drag as unknown as React.LegacyRef<HTMLDivElement>}
     style={{
       opacity: isDragging ? 0.5 : 1,
-      backgroundColor : currentTheme.slideBackgroundColor,
     }}
-    className='border rounded-lg'
+    className='border rounded-lg bg-white/20 dark:bg-white/10 hover:bg-white/30 dark:hover:bg-white/15 transition-colors'
     >
       <LayoutPreviewItem 
       name={name}
@@ -45,9 +44,6 @@ const LayoutPicker = () => {
   return (
     <ScrollArea
     className='h-[400px]'
-    style={{
-        backgroundColor: currentTheme.slideBackgroundColor,
-    }}
     >
       <div className='p-4'>
         {layouts.map((group) => <div key={group.name} className='mb-6'>

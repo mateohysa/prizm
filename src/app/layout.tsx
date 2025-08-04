@@ -31,6 +31,17 @@ export default function RootLayout({
         className="antialiased"
         suppressHydrationWarning
       >
+        {/* Background Image */}
+        <div 
+          className="fixed inset-0 -z-10 opacity-30 dark:opacity-15"
+          style={{
+            backgroundImage: 'url(/bg-grad.webp)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundAttachment: 'fixed'
+          }}
+        />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
         {children}
         <Toaster />

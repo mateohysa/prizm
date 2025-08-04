@@ -84,7 +84,6 @@ const Page = (props: Props) => {
       style={{
         color: currentTheme.accentColor,
         fontFamily: currentTheme.fontFamily,
-        backgroundColor: currentTheme.backgroundColor,
       }}
       >
         <LayoutPreview hiddenOnMobile={true} />

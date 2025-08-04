@@ -44,7 +44,7 @@ const AppSidebar = ({recentProjects, user, ...props}:
     return (
       <Sidebar collapsible='offcanvas'
       {...props}
-      className="max-w-[212px] bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 border border-white/30 dark:border-white/10 transition-all duration-300 ease-in-out">
+      className="max-w-[212px] bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 transition-all duration-300 ease-in-out">
         <SidebarHeader className="pt-6 px-3 pb-0">
           <AppSidebarHeaderContent />
         </SidebarHeader>  
