@@ -24,7 +24,7 @@ const LayoutPreview = ({ hiddenOnMobile = true }: Props) => {
         cn(
             // Hide below the `sm` breakpoint when mobile collapse is enabled
             hiddenOnMobile ? 'hidden sm:block' : '',
-            'w-72 h-full fixed left-0 top-20 border-r overflow-y-auto'
+            'w-72 h-full fixed left-0 top-20 overflow-y-auto bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100'
         )
     }
     >

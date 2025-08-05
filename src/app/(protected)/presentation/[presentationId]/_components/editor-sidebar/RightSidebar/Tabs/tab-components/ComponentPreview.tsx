@@ -27,12 +27,12 @@ const ComponentPreview = ({
     ref={drag as unknown as React.RefObject<HTMLDivElement>}
     >
         <button
-        className={cn('flex flex-col items-center cursor-grab active:cursor-grabbing gap-2 p-2 rounded-lg hover:bg-primary-10 transition-all duration-200',
+        className={cn('flex flex-col items-center cursor-grab active:cursor-grabbing gap-2 p-2 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-200',
             'text-center w-full',
             'hover:scale-105 transform'
         )}
         >
-            <div className='w-full aspect=[16/9] rounded-md border bg-gray-100 dark:bg-gray-700 p-2 shadow-sm hover:shadow-md transition-shadow duration-200'
+            <div className='w-full aspect=[16/9] rounded-md border border-white/30 dark:border-white/20 bg-white/10 dark:bg-white/5 p-2 shadow-sm hover:shadow-md transition-shadow duration-200'
             >
                 <div className='flex items-center justify-center gap-2'>
                     <span className='text-2xl text-primary'>{item.icon}</span>

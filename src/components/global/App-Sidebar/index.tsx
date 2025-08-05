@@ -78,13 +78,22 @@ const AppSidebar = (props: {recentProjects: Project[]} & {user: User} &
   // Render a placeholder during hydration
   if (!mounted) {
     return (
-      <div className="max-w-[212px] h-screen bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 border border-white/30 dark:border-white/10">
-        {/* Placeholder content */}
-      </div>
-    );
-  }
+      <Sidebar collapsible='offcanvas'
+      {...props}
+      className="max-w-[212px] bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 transition-all duration-300 ease-in-out">
+        <SidebarHeader className="pt-6 px-3 pb-0">
+          <AppSidebarHeaderContent />
+        </SidebarHeader>  
+        <SidebarContent className=" px-3 mt-10 gap-y-6 mr-2">
+          <NavMain items={data.navMain} />
+          <RecentOpen recentProjects={recentProjects} />
+        </SidebarContent>
+        <SidebarFooter>
+          <NavFooter prismaUser={user}/>
+        </SidebarFooter>
+      </Sidebar>
+  )
 
-  return <AppSidebarContent {...props} />;
 }
 
 export default AppSidebar
