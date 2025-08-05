@@ -45,13 +45,13 @@ const AppSidebarHeaderContent = () => {
 };
 
 // Hydration-safe wrapper component
-const AppSidebarContent = ({ recentProjects, user, ...props }: 
+const AppSidebarContent = ({ recentProjects, user, ...sidebarProps }: 
     {recentProjects: Project[]} & {user: User} & 
     React.ComponentProps<typeof Sidebar>) => {
   
   return (
     <Sidebar collapsible='offcanvas'
-    {...props}
+    {...sidebarProps}
     className="max-w-[212px] bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 border border-white/30 dark:border-white/10 transition-all duration-300 ease-in-out">
       <SidebarHeader className="pt-6 px-3 pb-0">
         <AppSidebarHeaderContent />
@@ -67,7 +67,8 @@ const AppSidebarContent = ({ recentProjects, user, ...props }:
   );
 };
 
-const AppSidebar = (props: {recentProjects: Project[]} & {user: User} & 
+const AppSidebar = ({ recentProjects, user, ...sidebarProps }: 
+    {recentProjects: Project[]} & {user: User} & 
     React.ComponentProps<typeof Sidebar>) => {
   const [mounted, setMounted] = useState(false);
 
@@ -79,21 +80,24 @@ const AppSidebar = (props: {recentProjects: Project[]} & {user: User} &
   if (!mounted) {
     return (
       <Sidebar collapsible='offcanvas'
-      {...props}
+      {...sidebarProps}
       className="max-w-[212px] bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 transition-all duration-300 ease-in-out">
         <SidebarHeader className="pt-6 px-3 pb-0">
           <AppSidebarHeaderContent />
         </SidebarHeader>  
         <SidebarContent className=" px-3 mt-10 gap-y-6 mr-2">
           <NavMain items={data.navMain} />
-          <RecentOpen recentProjects={recentProjects} />
+          <RecentOpen recentProjects={[]} />
         </SidebarContent>
         <SidebarFooter>
           <NavFooter prismaUser={user}/>
         </SidebarFooter>
       </Sidebar>
-  )
+    )
+  }
 
-}
+  // Return the actual content when mounted
+  return <AppSidebarContent recentProjects={recentProjects} user={user} {...sidebarProps} />;
+};
 
 export default AppSidebar

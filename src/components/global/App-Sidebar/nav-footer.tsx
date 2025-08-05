@@ -56,26 +56,27 @@ const NavFooter = ({prismaUser}: {prismaUser: User}) => {
       <SidebarMenuItem>
         {/* Upgrade CTA hidden when sidebar is collapsed */}
         {!prismaUser.subscription && (
-          <div className="flex flex-col items-start p-2 pb-3 gap-2 bg-white/40 dark:bg-white/10 bg-clip-padding backdrop-blur-sm backdrop-saturate-100 backdrop-contrast-100 border border-white/20 dark:border-white/5 group-data-[collapsible=icon]:hidden ml-2 rounded-lg shadow-lg shadow-black/10">
-            <div className="flex flex-col items-start gap-1">
-              <p className="text-base font-bold">
+          <div className="flex flex-col items-start p-2 gap-3 bg-white/40 dark:bg-white/10 bg-clip-padding backdrop-blur-sm backdrop-saturate-100 backdrop-contrast-100 border border-white/20 dark:border-white/5 group-data-[collapsible=icon]:hidden ml-2 mr-2 rounded-lg shadow-lg shadow-black/10 mb-4">
+            <div className="flex flex-col items-start gap-1.5">
+              <p className="text-sm font-bold leading-tight">
                 Get <span className="text-vivid">Creative AI</span>
               </p>
-              <span className="text-sm dark:text-secondary">
-                Unlock all features including AI and more
-              </span>
+              
             </div>
             <Button
               className="w-full
               border
-              border-vivid
+              border-vivid/60
               bg-white/30 dark:bg-white/10
               hover:bg-white/40 dark:hover:bg-white/20
               text-primary
-              rounded-xl
-              font-bold"
+              rounded-lg
+              font-semibold
+              h-9
+              transition-all
+              duration-200"
               variant="outline"
-              size={'lg'}
+              size={'sm'}
               onClick={handleUpgrade}
             >
               {loading ? 'Upgrading...' : 'Upgrade'}

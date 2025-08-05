@@ -504,31 +504,56 @@ const generateImageUrl = async (prompt: string): Promise<string> => {
     relevance to the description provided.
       Example Use Cases : Business presentations, educational slides, professional designs.
     `;
+    
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY environment variable is not set");
     }
+    
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${apiKey}`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json; charset=utf-8' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          instances: [{ prompt: improvedPrompt }],
-          parameters: { sampleCount: 1 },
+          contents: [{
+            parts: [
+              { text: improvedPrompt }
+            ]
+          }],
+          generationConfig: {
+            responseModalities: ["TEXT", "IMAGE"]
+          }
         }),
       }
     );
+    
     const json = await response.json();
-    const predictions = (json as any).predictions;
-    if (Array.isArray(predictions) && predictions.length > 0 && predictions[0].bytesBase64Encoded) {
-      return `data:image/png;base64,${predictions[0].bytesBase64Encoded}`;
+    
+    // Check if response is successful
+    if (!response.ok) {
+      console.error("Image generation API error:", json);
+      return 'https://plus.unsplash.com/premium_photo-1729004379397-ece899804701?q=80&w=2767&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
     }
-    console.error("No predictions returned for image generation", json);
-    return 'https"//via.placeholder.com/1024';
+    
+    // Parse the new Gemini 2.0 Flash response format
+    const candidates = json.candidates;
+    if (candidates && candidates.length > 0) {
+      const content = candidates[0].content;
+      if (content && content.parts) {
+        for (const part of content.parts) {
+          if (part.inlineData && part.inlineData.data) {
+            return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+          }
+        }
+      }
+    }
+    
+    console.error("No image data found in response", json);
+    return 'https://plus.unsplash.com/premium_photo-1729004379397-ece899804701?q=80&w=2767&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
   } catch (error) {
     console.error("Error generating image URL:", error);
-    return 'https"//via.placeholder.com/1024';
+    return 'https://plus.unsplash.com/premium_photo-1729004379397-ece899804701?q=80&w=2767&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
   }
 };
 
@@ -541,16 +566,23 @@ const generateImageUrl = async (prompt: string): Promise<string> => {
  */
 const findImageComponents = (layout: ContentItem): ContentItem[] => {
     const images = []
+    console.log("🔍 Searching for images in:", layout.type, "with content type:", typeof layout.content)
+    
     if(layout.type === "image"){
+      console.log("✅ Found image component:", layout.alt || "No alt text")
       images.push(layout)
     }
     if(Array.isArray(layout.content)){
+      console.log("🔄 Recursing into array content with", layout.content.length, "items")
       layout.content.forEach((child) => {
         images.push(...findImageComponents(child as ContentItem))
       })
     }else if(layout.content && typeof layout.content === "object"){
-
+      console.log("🔄 Recursing into object content")
+      images.push(...findImageComponents(layout.content as ContentItem))
     }
+    
+    console.log("🎯 Found", images.length, "images in this component")
     return images
   }
 /**
@@ -591,7 +623,7 @@ export const getGenerateLayoutsJSON = async (outlineArray: string[]) => {
     I will provide you with a pattern and a format to follow and for each outline, you must generate unique layouts and contents and give me the output in the JSON format expected.
     Our final JSON output is a combination of layouts and elements.
     The available LAYOUTS TYPES are as follows: 
-    "accentLeft", "accentRight", "imageAndText", "textAndImage", "twoColumns", "twoColumnsWithHeadings", "threeColumns", "fourColumns", "twoImageColumns", "threeImageColumns", "fourImageColumns", "tableLayout".
+    "accentLeft", "accentRight", "imageAndText", "textAndImage", "twoColumns", "twoColumnsWithHeadings"/* , "threeColumns", "fourColumns", "twoImageColumns", "threeImageColumns", "fourImageColumns", "tableLayout" */.
     The available CONTENT TYPES are as follows:
     "heading1", "heading2", "heading3", "heading4", "title", "paragraph", "table", "resizable-column", "image", "blockquote", "numberedList", "bulletList", "calloutBox", "codeBlock", "tableOfContents", "divider", "column".
 
@@ -785,15 +817,44 @@ export const generateLayouts = async (projectId: string, theme: string) => {
         if(layouts.status !== 200){
             return {status: 500, error: "Error generating layouts.", data: layouts}
         }
+
+        // 🔍 DEBUG: Check what we got from layout generation
+        console.log("📊 Layouts generated successfully!")
+        console.log("📊 Number of slides:", layouts.data?.length || 0)
+        console.log("📊 First slide structure:", layouts.data?.[0] ? JSON.stringify(layouts.data[0], null, 2).substring(0, 500) + "..." : "No slides")
+
+        // 🔥 NEW: Process each slide to replace image placeholders with generated images
+        console.log("🖼️ Starting image generation for", layouts.data.length, "slides...")
+        const slidesWithImages = await Promise.allSettled(
+            layouts.data.map(async (slide: Slide, index: number) => {
+                try {
+                    console.log(`🔄 Processing slide ${index + 1}/${layouts.data.length}: ${slide.slideName}`)
+                    await replaceImagePlaceholders(slide)
+                    console.log(`✅ Completed slide ${index + 1}`)
+                    return slide
+                } catch (error) {
+                    console.error(`❌ Error processing slide ${index + 1}:`, error)
+                    return slide // Return slide as-is if image generation fails
+                }
+            })
+        )
+
+        // Extract successful results
+        const processedSlides = slidesWithImages.map(result => 
+            result.status === 'fulfilled' ? result.value : null
+        ).filter(Boolean)
+
+        console.log("🎉 Image generation complete!")
+
         await client.project.update({
             where: {
                 id: projectId
             },
             data: {
-                slides: layouts.data, themeName: theme
+                slides: processedSlides, themeName: theme
             }
         })
-        return {status: 200, data: layouts.data}
+        return {status: 200, data: processedSlides}
     }catch(error){
         console.error("❌ ERROR:", error)
         return {status: 500, error: "OUTER Error generating layouts.", data: []}

@@ -6,27 +6,27 @@ import {
   ImageAndText,
   TextAndImage,
   TwoColumns,
-  ThreeColumns,
   TwoColumnsWithHeadings,
-  ThreeColumnsWithHeadings,
-  FourColumns,
-  TwoImageColumns,
-  FourImageColumns,
-  ThreeImageColumns,
+  // ThreeColumns,
+  // ThreeColumnsWithHeadings,
+  // FourColumns,
+  // TwoImageColumns,
+  // FourImageColumns,
+  // ThreeImageColumns,
 } from "@/lib/slideLayouts";
 import { ComponentGroup, LayoutGroup, LayoutSlides, Theme } from "@/lib/types";
 import {
   BlankCardIcon,
-  FourColumnsIcon,
-  FourImageColumnsIcon,
+  // FourColumnsIcon,
+  // FourImageColumnsIcon,
   ImageAndTextIcon,
   TextAndImageIcon,
-  ThreeColumnsIcon,
-  ThreeColumnsWithHeadingsIcon,
-  ThreeImageColumnsIcon,
+  // ThreeColumnsIcon,
+  // ThreeColumnsWithHeadingsIcon,
+  // ThreeImageColumnsIcon,
   TwoColumnsIcon,
   TwoColumnsWithHeadingsIcon,
-  TwoImageColumnsIcon,
+  // TwoImageColumnsIcon,
 } from "./IconsComponent";
 import {
   BulletListComponent,
@@ -203,7 +203,7 @@ export const layouts: LayoutGroup[] = [
         layoutType: "twoColumnsWithHeadings",
         component: TwoColumnsWithHeadings,
       },
-      {
+      /* {
         name: "Three Columns",
         icon: ThreeColumnsIcon,
         type: "layout",
@@ -224,7 +224,7 @@ export const layouts: LayoutGroup[] = [
         type: "layout",
         layoutType: "fourColumns",
         component: FourColumns,
-      },
+      }, */
     ],
   },
 
@@ -248,7 +248,7 @@ export const layouts: LayoutGroup[] = [
     ],
   },
 
-  {
+  /* {
     name: "Images",
     layouts: [
       {
@@ -273,7 +273,7 @@ export const layouts: LayoutGroup[] = [
         component: FourImageColumns,
       },
     ],
-  },
+  }, */
 ];
 
 export const component: ComponentGroup[] = [
