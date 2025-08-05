@@ -3,7 +3,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui
 import { SignedIn, UserButton, useUser } from '@clerk/nextjs'
 import { User } from '@/generated/prisma'
 import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { buySubscription } from '@/actions/lemonSqueezy'
 import { toast } from 'sonner'
@@ -11,9 +11,31 @@ import { toast } from 'sonner'
 const NavFooter = ({prismaUser}: {prismaUser: User}) => {
     const {isLoaded, isSignedIn, user} = useUser()
     const[loading, setLoading] = useState(false)
+    const [mounted, setMounted] = useState(false)
     const router = useRouter()
 
-    if(!isLoaded || !isSignedIn) return null
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    // Prevent hydration mismatch by not rendering until mounted
+    if (!mounted) {
+        return (
+            <SidebarMenu>
+                <SidebarMenuItem>
+                    <div className="h-20" /> {/* Placeholder to maintain layout */}
+                </SidebarMenuItem>
+            </SidebarMenu>
+        )
+    }
+
+    if(!isLoaded || !isSignedIn) return (
+        <SidebarMenu>
+            <SidebarMenuItem>
+                <div className="h-20" /> {/* Placeholder to maintain layout */}
+            </SidebarMenuItem>
+        </SidebarMenu>
+    )
 
     const handleUpgrade = async () => {
       // setLoading(true)

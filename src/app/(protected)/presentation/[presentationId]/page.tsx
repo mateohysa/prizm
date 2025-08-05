@@ -13,6 +13,7 @@ import Navbar from './_components/Navbar/Navbar'
 import LayoutPreview from './_components/editor-sidebar/LeftSidebar/LayoutPreview'
 import Editor from './_components/editor/Editor'
 import EditorSidebar from './_components/editor-sidebar/RightSidebar'
+import { Slide } from '@/lib/types'
 
 type Props = {}
 
@@ -51,7 +52,9 @@ const Page = (props: Props) => {
             setCurrentTheme(findTheme || themes[0])
             setTheme(findTheme?.type === 'dark' ? 'dark' : 'light')
             setProject(res.data)
-            setSlides(JSON.parse(JSON.stringify(res.data.slides)))
+            if (res.data.slides && Array.isArray(res.data.slides)) {
+                setSlides(res.data.slides as unknown as Slide[])
+            }
             setProjectTitle(res.data.title)
           }catch(error){
             toast.error("Error!", {
