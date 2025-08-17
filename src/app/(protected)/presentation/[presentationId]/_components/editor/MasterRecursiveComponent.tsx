@@ -295,12 +295,35 @@ const ContentRenderer: React.FC<ContentRendererProps> = React.memo((
             )
         case 'column':
             if(Array.isArray(content.content)){
+                const children = content.content as ContentItem[]
+                const hasAtLeastTwoChildren = children.length >= 2
+                const onlyBlockChildren = children.every((c)=> c.type === 'image' || c.type === 'column' || c.type === 'resizable-column')
+
+                if (hasAtLeastTwoChildren && onlyBlockChildren) {
+                    // Heuristic: treat this column as a horizontal split (image/text side-by-side)
+                    return (
+                        <motion.div
+                            className={cn('w-full h-full', content.className)}
+                            {...animationProps}
+                        >
+                            <ColumnComponent
+                                content={children}
+                                className={content.className}
+                                onContentChange={onContentChange}
+                                slideId={slideId}
+                                isPreview={isPreview}
+                                isEditable={isEditable}
+                            />
+                        </motion.div>
+                    )
+                }
+
                 return (<motion.div
                     className={cn('w-full h-full flex flex-col', content.className)}
                     {...animationProps}
                     >
-                       {content.content.length > 0 ?
-                       (content.content as ContentItem[]).map((subItem:ContentItem, subIndex:number)=>(
+                       {children.length > 0 ?
+                       children.map((subItem:ContentItem, subIndex:number)=>(
                         <React.Fragment key={subItem.id || `item-${subIndex}`}>
                             {!isPreview && !subItem.restrictToDrop && 
                             subIndex==0 && 

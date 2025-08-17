@@ -140,7 +140,6 @@ export const DraggableSlide:React.FC<DraggableSlideProps> = (
             'w-full rounded-lg shadow-lg relative p-0',
             'shadow-xl transition-shadow duration-300',
             'overflow-hidden flex flex-col',
-            'aspect-[16/9]',
             index === currentSlide ? 'ring-2 ring-blue-500 ring-offset-2' : '',
             slide.className,
             isDragging ? 'opacity-50' : 'opacity-100'
@@ -150,7 +149,7 @@ export const DraggableSlide:React.FC<DraggableSlideProps> = (
         }}
         onClick={()=>setCurrentSlide(index)}
         >
-            <div className='h-full w-full overflow-hidden flex flex-col'>
+            <div className='h-full w-full overflow-hidden'>
                 <MasterRecursiveComponent 
                 content={slide.content}
                 isPreview={false}
