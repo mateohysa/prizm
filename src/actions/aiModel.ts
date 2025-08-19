@@ -75,27 +75,6 @@ export const generateCreativePrompt = async (userPrompt: string) => {
 const existingLayouts = [
     {
       id: uuidv4(),
-      slideName: "Blank card",
-      type: "blank-card",
-      className: "p-8 mx-auto flex justify-center items-center min-h-[200px]",
-      content: {
-        id: uuidv4(),
-        type: "column" as ContentType,
-        name: "Column",
-        content: [
-          {
-            id: uuidv4(),
-            type: "title" as ContentType,
-            name: "Title",
-            content: "",
-            placeholder: "Untitled Card",
-          },
-        ],
-      },
-    },
-  
-    {
-      id: uuidv4(),
       slideName: "Accent left",
       type: "accentLeft",
       className: "min-h-[300px]",
@@ -586,6 +565,78 @@ const findImageComponents = (layout: ContentItem): ContentItem[] => {
     return images
   }
 /**
+ * Fix invalid twoColumns structure
+ * Detects slides with content2 property and converts to proper resizable-column structure
+ * 1. Check if slide is twoColumns type with content2 property
+ * 2. Extract left and right column content
+ * 3. Create proper resizable-column structure with two column children
+ * 4. Remove centering classes and replace with top alignment
+ * 5. Return fixed slide without content2 property
+ */
+const fixTwoColumnsStructure = (slide: Slide): Slide => {
+    // Type assertion to check for content2 property
+    const slideWithContent2 = slide as Slide & { content2?: ContentItem };
+    
+    // Only process two-column slide types that have the invalid content2 property
+    const isTwoColumnSlide = slide.type === "twoColumns" || slide.type === "twoColumnsWithHeadings";
+    if (!isTwoColumnSlide || !slideWithContent2.content2) {
+        return slide;
+    }
+
+    const leftColumn = slideWithContent2.content;
+    const rightColumn = slideWithContent2.content2;
+
+    console.log(`🔧 Fixing invalid ${slide.type} structure for slide: ${slide.slideName}`);
+
+    // Create the proper structure with resizable-column
+    const fixedContent: ContentItem = {
+        id: uuidv4(),
+        type: "column" as ContentType,
+        name: "Column",
+        content: [
+            {
+                id: uuidv4(),
+                type: "title" as ContentType,
+                name: "Title", 
+                content: "",
+                placeholder: "Untitled Card",
+            },
+            {
+                id: uuidv4(),
+                type: "resizable-column" as ContentType,
+                name: "Text and image",
+                className: "border",
+                content: [
+                    // Left column content (convert to proper column structure)
+                    {
+                        id: uuidv4(),
+                        type: "column" as ContentType,
+                        name: "Left Column",
+                        content: Array.isArray(leftColumn.content) ? leftColumn.content : [leftColumn],
+                        className: leftColumn.className?.replace(/justify-center items-center/g, 'items-start') || undefined
+                    },
+                    // Right column content (convert to proper column structure)  
+                    {
+                        id: uuidv4(),
+                        type: "column" as ContentType,
+                        name: "Right Column",
+                        content: Array.isArray(rightColumn.content) ? rightColumn.content : [rightColumn],
+                        className: rightColumn.className?.replace(/justify-center items-center/g, 'items-start') || undefined
+                    }
+                ],
+            },
+        ],
+    };
+
+    // Return the fixed slide without the invalid content2 property
+    const { content2, ...cleanSlide } = slideWithContent2;
+    return {
+        ...cleanSlide,
+        content: fixedContent
+    };
+};
+
+/**
  * Replace image placeholders
  * 1. Find all image components in slide layout
  * 2. Log discovered components
@@ -642,9 +693,9 @@ export const getGenerateLayoutsJSON = async (outlineArray: string[]) => {
       ${JSON.stringify(
         [
           {
-            slideName: "Blank card",
-            type: "blank-card",
-            className: "p-8 mx-auto flex justify-center items-center min-h-[200px]",
+            slideName: "Text and Image",
+            type: "textAndImage",
+            className: "p-4 mx-auto flex justify-center items-center",
             content: {}
           }
         ]
@@ -652,38 +703,27 @@ export const getGenerateLayoutsJSON = async (outlineArray: string[]) => {
     8. The content property of each LAYOUTS TYPE should start with "column" and within the columns content property you can use any of the CONTENT TYPES i provided above. Resizable-column, column, and other multi element contents should be an array because you can have more elements inside them nested. Static elements like title and paragraph should have content set to a string. Here is an example of what 1 layout with 1 column with 1 title inside would look like:
     ${JSON.stringify(
       {
-        slideName: "Blank card",
-        type: "blank-card",
-        className: "p-8 mx-auto flex justify-center items-center min-h-[200px]",
+        slideName: "Two Columns",
+        type: "twoColumns",
+        className: "p-4 mx-auto flex justify-center items-center",
         content: {
           id: uuidv4(),
-          type: "title" as ContentType,
-          name: "Title",
-          content: '',
-          placeholder: "Untitled Card",
+          type: "column" as ContentType,
+          name: "Column",
+          content: [
+            {
+              id: uuidv4(),
+              type: "title" as ContentType,
+              name: "Title",
+              content: '',
+              placeholder: "Untitled Card",
+            }
+          ]
         }
       }
     )}
     9. Here is a final example of an example for you to get an idea:
     ${JSON.stringify([
-      {
-        slideName: "Blank card",
-        type: "blank-card",
-        className: "p-8 mx-auto flex justify-center items-center min-h-[200px]",
-        content: {
-          id: uuidv4(),
-          type: "title" as ContentType,
-          name: "Title",
-          content: [{
-            id: uuidv4(),
-            type: "title" as ContentType,
-            name: "Title",
-            content: "This is a title",
-            placeholder: "Untitled Card",
-          },
-          ],
-        },
-      },
       {
         id: uuidv4(),
         slideName: "Accent Left",
@@ -823,28 +863,33 @@ export const generateLayouts = async (projectId: string, theme: string) => {
         console.log("📊 Number of slides:", layouts.data?.length || 0)
         console.log("📊 First slide structure:", layouts.data?.[0] ? JSON.stringify(layouts.data[0], null, 2).substring(0, 500) + "..." : "No slides")
 
-        // 🔥 NEW: Process each slide to replace image placeholders with generated images
-        console.log("🖼️ Starting image generation for", layouts.data.length, "slides...")
+        // 🔥 NEW: Process each slide to fix structure and replace image placeholders
+        console.log("🔄 Starting slide processing for", layouts.data.length, "slides...")
         const slidesWithImages = await Promise.allSettled(
             layouts.data.map(async (slide: Slide, index: number) => {
                 try {
                     console.log(`🔄 Processing slide ${index + 1}/${layouts.data.length}: ${slide.slideName}`)
-                    await replaceImagePlaceholders(slide)
+                    
+                    // Fix invalid twoColumns structure first
+                    const fixedSlide = fixTwoColumnsStructure(slide);
+                    
+                    // Then process images
+                    await replaceImagePlaceholders(fixedSlide)
                     console.log(`✅ Completed slide ${index + 1}`)
-                    return slide
+                    return fixedSlide
                 } catch (error) {
                     console.error(`❌ Error processing slide ${index + 1}:`, error)
-                    return slide // Return slide as-is if image generation fails
+                    return slide // Return slide as-is if processing fails
                 }
             })
         )
 
         // Extract successful results
-        const processedSlides = slidesWithImages.map(result => 
+        const processedSlides = slidesWithImages.map((result: PromiseSettledResult<Slide>) => 
             result.status === 'fulfilled' ? result.value : null
-        ).filter(Boolean)
+        ).filter(Boolean) as any
 
-        console.log("🎉 Image generation complete!")
+        console.log("🎉 Slide processing complete!")
 
         await client.project.update({
             where: {
