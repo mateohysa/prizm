@@ -29,6 +29,9 @@ model User {
 
   Projects          Project[] @relation("OwnedProjects")
   PurchasedProjects Project[] @relation("PurchasedProjects")
+  Prompts           Prompt[]
+
+  @@map("users")
 }
 
 model Project {
@@ -48,4 +51,19 @@ model Project {
   User User @relation("OwnedProjects", fields: [userId], references: [id])
 
   PurchasedByUser User[] @relation("PurchasedProjects")
+
+  @@map("projects")
+}
+
+model Prompt {
+  id        String   @id @default(cuid())
+  userId    String   @db.Uuid
+  title     String
+  outlines  Json // OutlineCard[] stored as JSON
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  User User @relation(fields: [userId], references: [id])
+
+  @@map("prompts")
 }

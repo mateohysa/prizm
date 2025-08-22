@@ -149,6 +149,15 @@ exports.Prisma.ProjectScalarFieldEnum = {
   themeName: 'themeName'
 };
 
+exports.Prisma.PromptScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  outlines: 'outlines',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -156,6 +165,10 @@ exports.Prisma.SortOrder = {
 
 exports.Prisma.NullableJsonNullValueInput = {
   DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
@@ -178,7 +191,8 @@ exports.Prisma.JsonNullValueFilter = {
 
 exports.Prisma.ModelName = {
   User: 'User',
-  Project: 'Project'
+  Project: 'Project',
+  Prompt: 'Prompt'
 };
 
 /**

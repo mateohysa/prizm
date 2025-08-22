@@ -33,6 +33,9 @@ interface SlideState {
 // Simplified storage with quota error handling
 const createSafeStorage = () => ({
   getItem: (name: string) => {
+    // Check if we're in the browser environment
+    if (typeof window === 'undefined') return null;
+    
     try {
       return localStorage.getItem(name);
     } catch (error) {
@@ -41,6 +44,9 @@ const createSafeStorage = () => ({
     }
   },
   setItem: (name: string, value: string) => {
+    // Check if we're in the browser environment
+    if (typeof window === 'undefined') return;
+    
     try {
       localStorage.setItem(name, value);
     } catch (error) {
@@ -61,6 +67,9 @@ const createSafeStorage = () => ({
     }
   },
   removeItem: (name: string) => {
+    // Check if we're in the browser environment
+    if (typeof window === 'undefined') return;
+    
     try {
       localStorage.removeItem(name);
     } catch (error) {

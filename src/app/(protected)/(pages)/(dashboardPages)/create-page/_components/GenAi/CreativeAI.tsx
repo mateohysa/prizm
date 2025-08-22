@@ -32,7 +32,7 @@ const CreateAI = ({onBack}: Props) => {
     const [editText, setEditText] = useState("")
     //stores
     const {currentAiPrompt, setCurrentAiPrompt, outlines, resetOutlines, addOutline, addMultipleOulines} = useCreativeAIStore()
-    const {prompts, addPrompt} = usePromptStore()
+    const {prompts, addPromptWithTransition} = usePromptStore()
     const {setProject} = useSlideStore()
         
     //functions
@@ -94,7 +94,7 @@ const CreateAI = ({onBack}: Props) => {
         router.push(`/presentation/${res.data?.id}/select-theme`)
         setProject(res.data!)
 
-        addPrompt({
+        addPromptWithTransition({
             id: v4(),
             title: currentAiPrompt ||  outlines?.[0]?.title,
             outlines: outlines,
