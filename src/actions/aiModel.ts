@@ -18,7 +18,7 @@ import { Images } from "lucide-react"
  * 4. Clean markdown and parse JSON response
  * 5. Return outline data or error
  */
-export const generateCreativePrompt = async (userPrompt: string) => {
+export const generateCreativePrompt = async (userPrompt: string, slideCount: number = 10) => {
     
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "")
 
@@ -26,16 +26,17 @@ export const generateCreativePrompt = async (userPrompt: string) => {
     
     You are a helpful AI assistant that creates outlines for presentations.
     Create a coherent and relevant outline for the following prompt: ${userPrompt}.
-    The outline should consist of at least 4 points, with
+    The outline should consist of exactly ${slideCount} points, with
     each point written as a single sentence with 10 or less words.
     Ensure the outline is well-structured and directly related to the topic.
+    Make sure you provide exactly ${slideCount} outline points, no more, no less.
     Return the output in the following JSON format:
     {
     "outlines":[
         "Point 1",
         "Point 2",
         "Point 3",
-        "Point 4"
+        ...continue until you have exactly ${slideCount} points
         ]
     }
 
