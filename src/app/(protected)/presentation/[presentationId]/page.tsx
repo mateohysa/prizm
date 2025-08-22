@@ -3,7 +3,7 @@ import { getProjectById } from '@/actions/project'
 import { themes } from '@/lib/constants'
 import { useSlideStore } from '@/store/useSlideStore'
 import { Loader2 } from 'lucide-react'
-import { useTheme } from 'next-themes'
+
 import { redirect, useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { DndProvider } from 'react-dnd'
@@ -29,7 +29,6 @@ const Page = (props: Props) => {
     } = useSlideStore()
 
     const params = useParams()
-    const {setTheme} = useTheme()
     const [isLoading, setIsLoading] = useState(true)
     const [projectTitle, setProjectTitle] = useState<string>("")
 
@@ -50,7 +49,6 @@ const Page = (props: Props) => {
 
 
             setCurrentTheme(findTheme || themes[0])
-            setTheme(findTheme?.type === 'dark' ? 'dark' : 'light')
             setProject(res.data)
             if (res.data.slides && Array.isArray(res.data.slides)) {
                 setSlides(res.data.slides as unknown as Slide[])
@@ -84,10 +82,6 @@ const Page = (props: Props) => {
       />
       <div
       className='flex-1 flex overflow-hidden pt-16'
-      style={{
-        color: currentTheme.accentColor,
-        fontFamily: currentTheme.fontFamily,
-      }}
       >
         <LayoutPreview hiddenOnMobile={true} />
         <div className='flex-1 sm:ml-64 pr-4 sm:pr-16'>

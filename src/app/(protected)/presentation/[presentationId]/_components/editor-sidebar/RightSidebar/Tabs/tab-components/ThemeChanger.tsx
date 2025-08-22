@@ -3,7 +3,6 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { themes } from '@/lib/constants'
 import { Theme } from '@/lib/types'
 import { useSlideStore } from '@/store/useSlideStore'
-import { useTheme } from 'next-themes'
 import React from 'react'
 import { toast } from 'sonner'
 import { updateProjectTheme } from '@/actions/project'
@@ -15,7 +14,6 @@ const ThemeChanger = (
     
 ) => {
     const {currentTheme, setCurrentTheme, project} = useSlideStore()
-    const {setTheme} = useTheme()
     const handleThemeChange = async (theme: Theme) => {
         if(!project){
             toast.error('Error',{
