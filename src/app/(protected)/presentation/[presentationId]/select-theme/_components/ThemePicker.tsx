@@ -4,7 +4,7 @@ import { Theme } from '@/lib/types'
 import { useSlideStore } from '@/store/useSlideStore'
 import { ScrollArea } from '@radix-ui/react-scroll-area'
 import { motion } from 'framer-motion'
-import { Loader2, Wand2 } from 'lucide-react'
+import { Loader2, ArrowRight } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
@@ -71,8 +71,8 @@ const ThemePicker = ({selectedTheme, themes, onThemeSelect}: Props) => {
             onClick={handleGenerateLayouts}
             >
                 
-                {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Wand2 className="mr-2 h-5 w-5" />}
-                {loading ? (<p className='animate-pulse'>Generating...</p>) : ("Generate Theme")}
+                {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <ArrowRight className="mr-2 h-5 w-5" />}
+                {loading ? (<p className='animate-pulse'>Generating...</p>) : ("Continue")}
             </Button>
         </div>
         <div className="flex-grow overflow-y-auto px-8 pb-8 hide-scrollbar">
