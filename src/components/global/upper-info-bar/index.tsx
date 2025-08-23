@@ -19,24 +19,24 @@ type Props = {
 const UpperInfoBar = ({user}: Props) => {
   const { open } = useSidebar()
   return (
-    <header className={`sticky top-0 z-[10] flex shrink-0 flex-wrap items-center gap-2 border-b border-white/20 dark:border-white/10 bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-sm backdrop-saturate-100 backdrop-contrast-100 p-4 justify-between duration-300 ease-in-out`}>
-        
-        
-
-      <div className='w-full flex flex-wrap items-center gap-8'>
+    <header className={`sticky top-0 z-[10] flex shrink-0 items-center border-b border-white/20 dark:border-white/10 bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-sm backdrop-saturate-100 backdrop-contrast-100 p-4 justify-between duration-300 ease-in-out`}>
+      {/* Left side group */}
+      <div className='flex items-center gap-4'>
         <SidebarTrigger />
-        <Separator orientation='vertical' className='sm:block mr-2 h-4' />
+        <Separator orientation='vertical' className='sm:block h-4' />
         <SearchBar />
+      </div>
+
+      {/* Right side group */}
+      <div className='flex items-center gap-4'>
         <ThemeSwitcher />
-        <div className='flex flex-wrap gap-4 items-center justify-end'>
-          <Button
+        <Button
           className='bg-primary-80 rounded-lg hover:bg-background-80 text-primary font-semibold cursor-not-allowed'
           title="Coming soon">
-            <Upload />
-            Import
-          </Button>
-           <NewProjectButton user={user} />
-        </div>
+          <Upload />
+          Import
+        </Button>
+        <NewProjectButton user={user} />
       </div>
     </header> 
   )

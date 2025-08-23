@@ -126,9 +126,8 @@ const ThemePreview = (props: Props) => {
 
     return (
         <div
-        className='h-screen w-full flex'
-        style={{backgroundColor: selectedTheme.backgroundColor,
-            color: selectedTheme.accentColor,
+        className='h-screen w-full flex bg-white/40 dark:bg-white/5 backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 bg-clip-padding border border-white/30 dark:border-white/10 overflow-hidden'
+        style={{
             fontFamily: selectedTheme.fontFamily,
         }}
         >
@@ -137,12 +136,8 @@ const ThemePreview = (props: Props) => {
                 <div className="p-12 flex flex-col items-center min-h-screen">
                 <Button
                 variant="outline"
-                className="mb-12 self-start"
+                className="mb-12 self-start text-foreground"
                 size="lg"
-                style={{
-                    backgroundColor: selectedTheme.accentColor + '10', color: selectedTheme.accentColor,
-                    borderColor: selectedTheme.accentColor + '20',
-                }}
                 onClick={() => router.push('/create-page')}
                 >
                     <ArrowLeft className="mr-2 h-5 w-5" />

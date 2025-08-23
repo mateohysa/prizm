@@ -51,32 +51,23 @@ const ThemePicker = ({selectedTheme, themes, onThemeSelect}: Props) => {
     }
   return (
     <div
-    className='w-[400px] sticky top-0 h-screen flex flex-col'
-    style={{
-        backgroundColor: selectedTheme.sidebarColor || selectedTheme.backgroundColor,
-        borderLeft: `1px solid ${selectedTheme.accentColor}20`,
-    }}
+    className='w-[400px] sticky top-0 h-screen flex flex-col bg-white/40 dark:bg-white/5 backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 bg-clip-padding border border-white/30 dark:border-white/10'
     >
         <div className='p-8 space-y-6 flex-shrink-0'>
             <div className='space-y-2'>
                 <h2
-                className='text-3xl font-bold tracking-tight'
-                style={{color: selectedTheme.accentColor}}
+                className='text-3xl font-bold tracking-tight text-foreground'
                 >
                     Pick a theme
                 </h2>
                 <p
-                className='text-sm'
-                style={{color: `${selectedTheme.accentColor}80`}}
+                className='text-sm text-muted-foreground'
                 >
-                    Choose from our curated themes or create your own.
+                    Choose from our curated themes.
                 </p>
             </div>
-            <Button className='w-full h-12 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300'
-            style={{
-                backgroundColor: selectedTheme.accentColor,
-                color: selectedTheme.backgroundColor,
-            }}
+            <Button 
+            className='w-full h-12 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300'
             onClick={handleGenerateLayouts}
             >
                 
@@ -84,7 +75,7 @@ const ThemePicker = ({selectedTheme, themes, onThemeSelect}: Props) => {
                 {loading ? (<p className='animate-pulse'>Generating...</p>) : ("Generate Theme")}
             </Button>
         </div>
-        <ScrollArea className="flex-grow overflow-y-auto px-8 pb-8 hide-scrollbar">
+        <div className="flex-grow overflow-y-auto px-8 pb-8 hide-scrollbar">
             <div className='grid grid-cols-1 gap-4'>
                 {
                     themes.map((theme) => (
@@ -132,7 +123,7 @@ const ThemePicker = ({selectedTheme, themes, onThemeSelect}: Props) => {
                     ))
                 }
             </div>
-        </ScrollArea>
+        </div>
     </div>
   )
 }

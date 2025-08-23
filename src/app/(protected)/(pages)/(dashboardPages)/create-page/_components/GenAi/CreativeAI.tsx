@@ -152,7 +152,7 @@ const CreateAI = ({onBack}: Props) => {
             className='flex flex-col sm:flex-row justify-between gap-3 items-center rounded-xl'
             >
                 <Input placeholder='Enter a prompt and add to the cards' 
-                className='text-base sm:text-xl border-0 focus-visible:ring:0 shadow-none p-0 bg-transparent flex-grow focus:outline-none' 
+                className='text-base sm:text-xl border-none focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none p-0 bg-transparent flex-grow focus:outline-none' 
                 required
                 onChange={(e)=>setCurrentAiPrompt(e.target.value)}
                 />

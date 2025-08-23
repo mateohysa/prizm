@@ -79,14 +79,17 @@ const createSafeStorage = () => ({
 });
 
 const defaultTheme: Theme = { 
-    name: 'Default',
-    fontFamily: "'Inter', sans-serif",
-    fontColor: '#333333', 
-    backgroundColor: '#f0f0f0', 
-    slideBackgroundColor: '#ffffff',
-    accentColor: '#3b82f6',
-    type: 'light',
-    }
+    name: "Ocean Breeze",
+    fontFamily: "'Open Sans', sans-serif",
+    fontColor: "#004060",
+    backgroundColor: "#0077be",
+    slideBackgroundColor: "#ffffff",
+    accentColor: "#00a86b",
+    gradientBackground: "linear-gradient(135deg, #0077be 0%, #00a86b 100%)",
+    navbarColor: "#0077be",
+    sidebarColor: "#005c8f",
+    type: "dark",
+}
 
 // Temporary flag to disable persistence if needed
 const DISABLE_PERSISTENCE = false; // Set to true if localStorage issues persist
