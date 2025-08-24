@@ -28,11 +28,16 @@ interface SlideState {
         parentId: string,
         index: number
     ) => void
+    isGenerating: boolean;
+    setIsGenerating: (isGenerating: boolean) => void;
 }
 
 // Simplified storage with quota error handling
 const createSafeStorage = () => ({
   getItem: (name: string) => {
+    // Check if we're in the browser environment
+    if (typeof window === 'undefined') return null;
+    
     try {
       return localStorage.getItem(name);
     } catch (error) {
@@ -41,6 +46,9 @@ const createSafeStorage = () => ({
     }
   },
   setItem: (name: string, value: string) => {
+    // Check if we're in the browser environment
+    if (typeof window === 'undefined') return;
+    
     try {
       localStorage.setItem(name, value);
     } catch (error) {
@@ -61,6 +69,9 @@ const createSafeStorage = () => ({
     }
   },
   removeItem: (name: string) => {
+    // Check if we're in the browser environment
+    if (typeof window === 'undefined') return;
+    
     try {
       localStorage.removeItem(name);
     } catch (error) {
@@ -70,14 +81,17 @@ const createSafeStorage = () => ({
 });
 
 const defaultTheme: Theme = { 
-    name: 'Default',
-    fontFamily: "'Inter', sans-serif",
-    fontColor: '#333333', 
-    backgroundColor: '#f0f0f0', 
-    slideBackgroundColor: '#ffffff',
-    accentColor: '#3b82f6',
-    type: 'light',
-    }
+    name: "Ocean Breeze",
+    fontFamily: "'Open Sans', sans-serif",
+    fontColor: "#004060",
+    backgroundColor: "#0077be",
+    slideBackgroundColor: "#ffffff",
+    accentColor: "#00a86b",
+    gradientBackground: "linear-gradient(135deg, #0077be 0%, #00a86b 100%)",
+    navbarColor: "#0077be",
+    sidebarColor: "#005c8f",
+    type: "dark",
+}
 
 // Temporary flag to disable persistence if needed
 const DISABLE_PERSISTENCE = false; // Set to true if localStorage issues persist
@@ -92,6 +106,8 @@ export const useSlideStore = DISABLE_PERSISTENCE
       setCurrentSlide: (index: number) => set({ currentSlide: index }),
       currentTheme: defaultTheme, 
       setCurrentTheme: (theme: Theme) => set({currentTheme: theme}),
+      isGenerating: false,
+      setIsGenerating: (isGenerating: boolean) => set({ isGenerating }),
       getOrderedSlides: () => {
           const state = get()
           return [...state.slides].sort((a, b) => a.slideOrder - b.slideOrder)
@@ -192,6 +208,8 @@ export const useSlideStore = DISABLE_PERSISTENCE
             setCurrentSlide: (index: number) => set({ currentSlide: index }),
             currentTheme: defaultTheme, 
             setCurrentTheme: (theme: Theme) => set({currentTheme: theme}),
+            isGenerating: false,
+            setIsGenerating: (isGenerating: boolean) => set({ isGenerating }),
             getOrderedSlides: () => {
                 const state = get()
                 return [...state.slides].sort((a, b) => a.slideOrder - b.slideOrder)

@@ -6,6 +6,7 @@ import { Heading1, Heading3, Heading4, Title } from '@/components/global/editor/
 import { cn } from '@/lib/utils'
 import Dropzone from './Dropzone'
 import { Heading2 } from '@/components/global/editor/headings'
+import { useSlideStore } from '@/store/useSlideStore'
 import Paragraph from '@/components/global/editor/Paragraph'
 import TableComponent from '@/components/global/editor/TableComp'
 import ColumnComponent from '@/components/global/editor/ColumnComponent'
@@ -53,6 +54,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = React.memo((
         index,
     }
 )=>{
+    const { currentTheme } = useSlideStore()
 
     const handleChange = useCallback((e:React.ChangeEvent<HTMLTextAreaElement>)=>{
         onContentChange(content.id, e.target.value)
@@ -64,6 +66,11 @@ const ContentRenderer: React.FC<ContentRendererProps> = React.memo((
         value: content.content as string,
         onChange: handleChange,
         isPreview: isPreview
+    }
+
+    const headingStyles = {
+        color: currentTheme.accentColor,
+        fontFamily: currentTheme.fontFamily
     }
 
     const animationProps = {
@@ -86,35 +93,35 @@ const ContentRenderer: React.FC<ContentRendererProps> = React.memo((
             className='w-full h-full'
             {...animationProps}
             >
-                <Heading1 {...commonProps} />
+                <Heading1 {...commonProps} styles={headingStyles} />
             </motion.div>)
         case 'heading2':
             return (<motion.div
             className='w-full h-full'
             {...animationProps}
             >
-                <Heading2 {...commonProps} />
+                <Heading2 {...commonProps} styles={headingStyles} />
             </motion.div>)
         case 'heading3':
             return (<motion.div
             className='w-full h-full'
             {...animationProps}
             >
-                <Heading3 {...commonProps} />
+                <Heading3 {...commonProps} styles={headingStyles} />
             </motion.div>)
         case 'heading4':
             return (<motion.div
             className='w-full h-full'
             {...animationProps}
             >
-                <Heading4 {...commonProps} />
+                <Heading4 {...commonProps} styles={headingStyles} />
             </motion.div>)
         case 'title':
             return (<motion.div
             className='w-full h-full'
             {...animationProps}
             >
-                <Title {...commonProps} />
+                <Title {...commonProps} styles={headingStyles} />
             </motion.div>)
         case 'paragraph':
             return (<motion.div
@@ -295,12 +302,35 @@ const ContentRenderer: React.FC<ContentRendererProps> = React.memo((
             )
         case 'column':
             if(Array.isArray(content.content)){
+                const children = content.content as ContentItem[]
+                const hasAtLeastTwoChildren = children.length >= 2
+                const onlyBlockChildren = children.every((c)=> c.type === 'image' || c.type === 'column' || c.type === 'resizable-column')
+
+                if (hasAtLeastTwoChildren && onlyBlockChildren) {
+                    // Heuristic: treat this column as a horizontal split (image/text side-by-side)
+                    return (
+                        <motion.div
+                            className={cn('w-full h-full', content.className)}
+                            {...animationProps}
+                        >
+                            <ColumnComponent
+                                content={children}
+                                className={content.className}
+                                onContentChange={onContentChange}
+                                slideId={slideId}
+                                isPreview={isPreview}
+                                isEditable={isEditable}
+                            />
+                        </motion.div>
+                    )
+                }
+
                 return (<motion.div
                     className={cn('w-full h-full flex flex-col', content.className)}
                     {...animationProps}
                     >
-                       {content.content.length > 0 ?
-                       (content.content as ContentItem[]).map((subItem:ContentItem, subIndex:number)=>(
+                       {children.length > 0 ?
+                       children.map((subItem:ContentItem, subIndex:number)=>(
                         <React.Fragment key={subItem.id || `item-${subIndex}`}>
                             {!isPreview && !subItem.restrictToDrop && 
                             subIndex==0 && 

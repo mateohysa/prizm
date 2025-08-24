@@ -1,4 +1,5 @@
 import React from 'react'
+import GeneratingOverlay from '@/components/global/GeneratingOverlay'
 
 type Props = {
     children: React.ReactNode
@@ -19,6 +20,9 @@ const Layout = (props: Props) => {
         }}
       />
       {props.children}
+      
+      {/* Global Generating Overlay */}
+      <GeneratingOverlay />
     </div>
   )
 }

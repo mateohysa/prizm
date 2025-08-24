@@ -104,7 +104,7 @@ const ScratchPage = ({onBack}: Props) => {
                 value={editText}
                 onChange={(e) => setEditText(e.target.value)}
                 placeholder='Enter your prompt and add to the cards...'
-                className='text-base sm:text-xl border-0 focus-visible:ring-0 shadow-none p-0 bg-transparent flex-grow'
+                className='text-base sm:text-xl border-none focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none p-0 bg-transparent flex-grow'
                 />
                 
                 

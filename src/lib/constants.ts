@@ -447,17 +447,17 @@ export const component: ComponentGroup[] = [
 
 
 export const themes: Theme[] = [
-  {
-    name: "Default",
-    fontFamily: "'Inter', sans-serif",
-    fontColor: "#000000",
-    backgroundColor: "#f0f0f0",
-    slideBackgroundColor: "#ffffff",
-    accentColor: "#3b82f6",
-    navbarColor: "#ffffff",
-    sidebarColor: "#f0f0f0",
-    type: "light",
-  },
+  // {
+  //   name: "Default",
+  //   fontFamily: "'Inter', sans-serif",
+  //   fontColor: "#000000",
+  //   backgroundColor: "#f0f0f0",
+  //   slideBackgroundColor: "#ffffff",
+  //   accentColor: "#3b82f6",
+  //   navbarColor: "#ffffff",
+  //   sidebarColor: "#f0f0f0",
+  //   type: "light",
+  // },
   {
     name: "Dark Elegance",
     fontFamily: "'DM Serif Display', serif",
@@ -530,17 +530,17 @@ export const themes: Theme[] = [
     sidebarColor: "#ffd700",
     type: "light",
   },
-  {
-    name: "Minimalist Mono",
-    fontFamily: "'IBM Plex Mono', monospace",
-    fontColor: "#000000",
-    backgroundColor: "#ffffff",
-    slideBackgroundColor: "#f5f5f5",
-    accentColor: "#d1d1d1",
-    navbarColor: "#f5f5f5",
-    sidebarColor: "#ffffff",
-    type: "light",
-  },
+  // {
+  //   name: "Minimalist Mono",
+  //   fontFamily: "'IBM Plex Mono', monospace",
+  //   fontColor: "#000000",
+  //   backgroundColor: "#ffffff",
+  //   slideBackgroundColor: "#f5f5f5",
+  //   accentColor: "#d1d1d1",
+  //   navbarColor: "#f5f5f5",
+  //   sidebarColor: "#ffffff",
+  //   type: "light",
+  // },
   {
     name: "Neon Nights",
     fontFamily: "'Orbitron', sans-serif",
