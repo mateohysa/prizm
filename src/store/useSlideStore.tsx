@@ -28,6 +28,8 @@ interface SlideState {
         parentId: string,
         index: number
     ) => void
+    isGenerating: boolean;
+    setIsGenerating: (isGenerating: boolean) => void;
 }
 
 // Simplified storage with quota error handling
@@ -104,6 +106,8 @@ export const useSlideStore = DISABLE_PERSISTENCE
       setCurrentSlide: (index: number) => set({ currentSlide: index }),
       currentTheme: defaultTheme, 
       setCurrentTheme: (theme: Theme) => set({currentTheme: theme}),
+      isGenerating: false,
+      setIsGenerating: (isGenerating: boolean) => set({ isGenerating }),
       getOrderedSlides: () => {
           const state = get()
           return [...state.slides].sort((a, b) => a.slideOrder - b.slideOrder)
@@ -204,6 +208,8 @@ export const useSlideStore = DISABLE_PERSISTENCE
             setCurrentSlide: (index: number) => set({ currentSlide: index }),
             currentTheme: defaultTheme, 
             setCurrentTheme: (theme: Theme) => set({currentTheme: theme}),
+            isGenerating: false,
+            setIsGenerating: (isGenerating: boolean) => set({ isGenerating }),
             getOrderedSlides: () => {
                 const state = get()
                 return [...state.slides].sort((a, b) => a.slideOrder - b.slideOrder)
