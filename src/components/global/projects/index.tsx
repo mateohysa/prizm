@@ -18,7 +18,7 @@ const Projects = ({projects}: Props) => {
     >
         {projects.map((project, index) => (
             <ProjectCard 
-            key={index} 
+            key={project.id} 
             projectId={project?.id}
             title={project?.title}
             createdAt={project?.createdAt.toString()}

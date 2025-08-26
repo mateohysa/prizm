@@ -106,10 +106,10 @@ export const recoverProject = async (projectId: string) => {
 }
 
 /**
- * Delete project
+ * Soft delete project
  * 1. Authenticate user
- * 2. Delete project record by ID
- * 3. If deletion fails, return error
+ * 2. Set isDeleted flag to true (soft delete)
+ * 3. If update fails, return error
  * 4. Return success message
  */
 export const deleteProject = async (projectId: string) => {
@@ -118,13 +118,16 @@ export const deleteProject = async (projectId: string) => {
         if(checkUser.status!== 200 || !checkUser.user){
             return {status: 403, error:"User not authenticated"}
         }
-        const deletedProject = await client.project.delete({
+        const deletedProject = await client.project.update({
             where: {
                 id: projectId,
+            },
+            data: {
+                isDeleted: true,
             }
         })
         if(!deletedProject){
-            return {status: 500, error:"Failed to recover project"}
+            return {status: 500, error:"Failed to delete project"}
         }
         return {status: 200, message: "Project deleted successfully"}
     } catch (error) {
