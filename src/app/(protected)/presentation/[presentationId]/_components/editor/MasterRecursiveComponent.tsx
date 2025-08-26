@@ -336,6 +336,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = React.memo((
                             subIndex==0 && 
                             isEditable && 
                             <Dropzone 
+                            key={`dropzone-start-${subIndex}`}
                             index={0}
                             parentId={content.id}
                             slideId={slideId || ''}
@@ -352,6 +353,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = React.memo((
                             isEditable && 
                             
                             <Dropzone
+                            key={`dropzone-end-${subIndex}`}
                             index={subIndex+1}
                             parentId={content.id}
                             slideId={slideId}

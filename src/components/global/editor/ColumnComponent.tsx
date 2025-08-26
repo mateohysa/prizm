@@ -66,7 +66,7 @@ const ColumnComponent = ({
                         </div>
                     </ResizablePanel>
                     {index < columns.length - 1 && isEditable && (
-                        <ResizableHandle withHandle={!isPreview} />
+                        <ResizableHandle key={`handle-${index}`} withHandle={!isPreview} />
                     )}
                 </React.Fragment>
             ))}

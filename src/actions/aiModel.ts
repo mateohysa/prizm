@@ -1,6 +1,7 @@
 "use server"
 import { OpenAI } from "openai"
 import {Content, GoogleGenerativeAI} from "@google/generative-ai"
+import Groq from 'groq-sdk'
 import { Theme, ContentType, Slide, ContentItem } from "@/lib/types"
 import { currentUser } from "@clerk/nextjs/server"
 import { client } from "@/lib/prisma"
@@ -667,153 +668,154 @@ const replaceImagePlaceholders = async (layout: Slide) => {
  * 5. Return layouts data or throw error
  */
 export const getGenerateLayoutsJSON = async (outlineArray: string[]) => {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "")
+    const groq = new Groq({
+        apiKey: process.env.GROQ_API_KEY
+    });
 
-    const prompt = `
-    
-    You are a highly creative AI that generates JSON-based layouts for presentations. 
+    const prompt = `You are a highly creative AI that generates JSON-based layouts for presentations. 
     I will provide you with a pattern and a format to follow and for each outline, you must generate unique layouts and contents and give me the output in the JSON format expected.
-    Our final JSON output is a combination of layouts and elements.
-    The available LAYOUTS TYPES are as follows: 
-    "accentLeft", "accentRight", "imageAndText", "textAndImage", "twoColumns", "twoColumnsWithHeadings"/* , "threeColumns", "fourColumns", "twoImageColumns", "threeImageColumns", "fourImageColumns", "tableLayout" */.
-    The available CONTENT TYPES are as follows:
-    "heading1", "heading2", "heading3", "heading4", "title", "paragraph", "table", "resizable-column", "image", "blockquote", "numberedList", "bulletList", "calloutBox", "codeBlock", "tableOfContents", "divider", "column".
 
-    Use these outlines as a starting point for the content of the presentations
-    ${JSON.stringify(outlineArray)}
-
-
-    The output must be an array of JSON objects.
-    1. Write layouts based on the specific outline provided. Do not use types that are not mentioned in the available layouts.
-    2. Ensuring each layout is unique.
-    3. Adhere to the structure of existing layouts.
-    4. Fill placeholder data into content fields where required.
-    5. Generate unique image placeholders for the 'content' property of image components and also alt text according to the outline.
-    6. Ensure proper formatting and schema alignment for the output JSON.
-    7. First create the LAYOUTS TYPES at the top most level of the JSON output as follows:
-      ${JSON.stringify(
-        [
-          {
-            slideName: "Text and Image",
-            type: "textAndImage",
-            className: "p-4 mx-auto flex justify-center items-center",
-            content: {}
-          }
-        ]
-      )}
-    8. The content property of each LAYOUTS TYPE should start with "column" and within the columns content property you can use any of the CONTENT TYPES i provided above. Resizable-column, column, and other multi element contents should be an array because you can have more elements inside them nested. Static elements like title and paragraph should have content set to a string. Here is an example of what 1 layout with 1 column with 1 title inside would look like:
-    ${JSON.stringify(
-      {
-        slideName: "Two Columns",
-        type: "twoColumns",
-        className: "p-4 mx-auto flex justify-center items-center",
-        content: {
-          id: uuidv4(),
-          type: "column" as ContentType,
-          name: "Column",
+    CRITICAL LAYOUT STRUCTURE REQUIREMENTS:
+    
+    For "textAndImage" slides, you MUST ALWAYS use this EXACT structure - DO NOT create flat structures:
+    {
+      type: "textAndImage",
+      content: {
+        type: "column",
+        content: [{
+          type: "resizable-column",
           content: [
             {
-              id: uuidv4(),
-              type: "title" as ContentType,
-              name: "Title",
-              content: '',
-              placeholder: "Untitled Card",
+              type: "column",
+              content: [heading, paragraph] // Text side
+            },
+            {
+              type: "column", 
+              content: [image] // Image side with NO padding classes
             }
           ]
-        }
+        }]
       }
-    )}
-    9. Here is a final example of an example for you to get an idea:
-    ${JSON.stringify([
-      {
+    }
+
+    The available LAYOUTS TYPES are: "accentLeft", "accentRight", "imageAndText", "textAndImage", "twoColumns", "twoColumnsWithHeadings"
+    The available CONTENT TYPES are: "heading1", "heading2", "heading3", "heading4", "title", "paragraph", "table", "resizable-column", "image", "blockquote", "numberedList", "bulletList", "calloutBox", "codeBlock", "tableOfContents", "divider", "column"
+
+    Use these outlines: ${JSON.stringify(outlineArray)}
+
+    RULES:
+    1. Write layouts based on the specific outline provided
+    2. Each layout must be unique
+    3. STRICTLY follow the structure examples provided
+    4. Fill placeholder data into content fields
+    5. Generate unique image placeholders and alt text
+    6. For images in textAndImage slides: DO NOT add "p-3" or padding classes - images should fill their entire half
+
+    Example textAndImage structure (FOLLOW EXACTLY):
+    ${JSON.stringify({
         id: uuidv4(),
-        slideName: "Accent Left",
-        type: "accentLeft",
-        className: "p-8 mx-auto flex justify-center items-center min-h-[200px]",
+        slideName: "Text and image",
+        type: "textAndImage",
+        className: "min-h-[200px] p-8 mx-auto flex justify-center items-center",
         content: {
           id: uuidv4(),
-          type: "column" as ContentType,
+          type: "column",
           name: "Column",
           content: [
             {
               id: uuidv4(),
-              type:'resizable-column' as ContentType,
-              name: 'Resizable Column',
-              restrictToDrop: true,
+              type: "resizable-column",
+              name: "Text and image",
+              className: "border",
               content: [
                 {
                   id: uuidv4(),
-                  type: 'image' as ContentType,
-                  name: 'Image',
-                  content: 'https://plus.unsplash.com/premium_photo-1729004379397-ece899804701?q=80&w=2767&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHXwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                  alt: 'Title'
-                },
-                {
-                  id: uuidv4(),
-                  type: 'column' as ContentType,
-                  name: 'Column',
+                  type: "column",
+                  name: "",
                   content: [
                     {
                       id: uuidv4(),
-                      type: 'heading1' as ContentType,
-                      name: 'Heading1',
-                      content: '',
-                      placeholder: 'Heading 1'
+                      type: "heading1",
+                      name: "Heading1",
+                      content: "",
+                      placeholder: "Heading1",
                     },
                     {
                       id: uuidv4(),
-                      type: 'paragraph' as ContentType,
-                      name: 'Paragraph',
-                      content: '',
-                      placeholder: 'Start typing...'
-                    }
+                      type: "paragraph",
+                      name: "Paragraph",
+                      content: "",
+                      placeholder: "start typing here",
+                    },
                   ],
-                  className: 'w-full h-full p-8 flex justify-center items-center',
-                  placeholder: 'Heading1'
-                }
-              ]
-            }
-          ]
-        }
-      }
-    ])}
- 
+                  className: "w-full h-full p-8 flex justify-center items-center",
+                  placeholder: "Heading1",
+                },
+                {
+                  id: uuidv4(),
+                  type: "column",
+                  name: "Column",
+                  content: [
+                    {
+                      id: uuidv4(),
+                      type: "image",
+                      name: "Image",
+                      content: "https://plus.unsplash.com/premium_photo-1729004379397-ece899804701?q=80&w=2767&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                      alt: "Title",
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+    })}
+
     For Images:
-    -The alt text should describe the image clearly and concisely.
-    -Focus on the main subject(s) of the image and any relevant details such as colors, shapes,
-    people, or objects.
-    -Ensure the alt text aligns with the context of the presentation slide it will be used on (e.g., professional, educational, business-related). 
-    -Avoid using terms like "image of" or "picture of," and instead focus directly on the content and meaning.
+    - Alt text should describe the image clearly and concisely
+    - Focus on main subjects, colors, shapes, people, or objects
+    - Align with presentation context (professional, educational, business)
+    - Avoid "image of" or "picture of"
     
-    Output the layouts in JSON format. Ensure there are no duplicate layouts across the array.
-    `
+    Output ONLY a valid JSON array of slide layouts. No markdown fences or explanations.`;
+
     try{
-        console.log("Sending request to Gemini API to generate layouts...")
-        //ai goes here
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash"});
+        console.log("Sending request to Groq API to generate layouts...")
+        
+        const completion = await groq.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            messages: [
+                {
+                    role: "user",
+                    content: prompt
+                }
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.7,
+            max_tokens: 8000
+        });
 
-        console.log("Sending request to Gemini API...");
-        const result = await model.generateContent(prompt);
-        const response = result.response;
-
-        const responseText = response?.text();
+        const responseText = completion.choices[0]?.message?.content;
         if (!responseText) {
             return { status: 400, error: "No content generated" };
         }
-        // Strip potential markdown fences
-        const cleaned = responseText.replace(/```json|```/g, "").trim();
+
         let jsonResponse;
         try {
-            jsonResponse = JSON.parse(cleaned);
+            const parsed = JSON.parse(responseText);
+            // Handle if response is wrapped in an object
+            jsonResponse = Array.isArray(parsed) ? parsed : (parsed.slides || parsed.layouts || [parsed]);
         } catch (parseError) {
-            console.error("❌ ERROR:", parseError);
+            console.error("❌ JSON Parse Error:", parseError);
+            console.error("❌ Response text:", responseText);
             throw new Error("Invalid JSON format received from AI");
         }
+
+        console.log("✅ Groq generated", jsonResponse.length, "layouts successfully");
         return { status: 200, data: jsonResponse };
 
-
     }catch(error){
-        console.error("❌ ERROR:", error);
+        console.error("❌ Groq API Error:", error);
         throw error;
     }
 }
