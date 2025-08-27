@@ -8,14 +8,21 @@ import { JsonValue } from "@prisma/client/runtime/library"
 
 /**
  * Fetch all projects
- * 1. Authenticate user
+ * 1. Use provided authenticated user or authenticate
  * 2. Query non-deleted projects sorted by updatedAt
  * 3. If none found, return 404
  * 4. Return project list
  */
-export const getAllProjects = async () => {
+export const getAllProjects = async (authenticatedUser?: Awaited<ReturnType<typeof onAuthenticateUser>>) => {
     try{
-        const checkUser = await onAuthenticateUser()
+        let checkUser: Awaited<ReturnType<typeof onAuthenticateUser>>
+        
+        if (authenticatedUser) {
+            checkUser = authenticatedUser
+        } else {
+            checkUser = await onAuthenticateUser()
+        }
+        
         if(checkUser.status!== 200 || !checkUser.user){
             return {status: 403, error:"User not authenticated"}
         }
@@ -42,14 +49,21 @@ export const getAllProjects = async () => {
 
 /**
  * Fetch recent projects
- * 1. Authenticate user
+ * 1. Use provided authenticated user or authenticate
  * 2. Query top 5 non-deleted projects by updatedAt
  * 3. If none found, return 404
  * 4. Return recent projects
  */
-export const getRecentProjects = async () => {
+export const getRecentProjects = async (authenticatedUser?: Awaited<ReturnType<typeof onAuthenticateUser>>) => {
     try{
-        const checkUser = await onAuthenticateUser()
+        let checkUser: Awaited<ReturnType<typeof onAuthenticateUser>>
+        
+        if (authenticatedUser) {
+            checkUser = authenticatedUser
+        } else {
+            checkUser = await onAuthenticateUser()
+        }
+        
         if(checkUser.status!== 200 || !checkUser.user){
             return {status: 403, error:"User not authenticated"}
         }

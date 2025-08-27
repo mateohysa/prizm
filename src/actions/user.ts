@@ -1,6 +1,7 @@
 "use server"
 import { client } from "@/lib/prisma"
 import { currentUser } from "@clerk/nextjs/server"
+import { cache } from "react"
 
 export const onAuthenticateUser = async () => {
     try{
@@ -43,3 +44,6 @@ export const onAuthenticateUser = async () => {
         return {status: 500}
     }
 }
+
+// Cached version of onAuthenticateUser to prevent redundant database calls within the same request
+export const getCachedAuthenticatedUser = cache(onAuthenticateUser)
