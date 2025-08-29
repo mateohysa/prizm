@@ -1,5 +1,22 @@
 # Performance Analysis Report: Dashboard & Create-Page Routes
 
+## Checklist / TODOs
+- [x] Stage 1 – Phase 1: Centralize Authentication (Low Risk)
+- [x] Stage 1 – Phase 2: Implement Initial Pagination (Medium Risk)
+- [ ] Stage 1 – Phase 3: Implement Proper Caching (Higher Impact)
+- [ ] Stage 2 – Phase 1: Static Thumbnails (Immediate Impact)
+- [ ] Stage 2 – Phase 2: Lazy Loading (Quick Win)
+- [ ] Stage 2 – Phase 3: Optimize Data Operations (Medium Effort)
+- [ ] Stage 2 – Phase 4: Virtual Scrolling (Higher Complexity)
+- [ ] Stage 3 – Phase 1: Selective Field Loading (Immediate)
+- [ ] Stage 3 – Phase 2: Thumbnail System (Medium Effort)
+- [ ] Stage 3 – Phase 3: Pagination & Virtualization (Higher Complexity)
+- [ ] Stage 3 – Phase 4: Smart Prefetching (Advanced)
+- [ ] Stage 4 – Phase 1: Enable Next.js Caching (Quick Win)
+- [ ] Stage 4 – Phase 2: Implement Data Fetching Library (Medium Effort)
+- [ ] Stage 4 – Phase 3: Optimistic Updates (Better UX)
+- [ ] Stage 4 – Phase 4: Edge Caching (Advanced)
+
 ## Executive Summary
 This document provides a comprehensive analysis of performance bottlenecks affecting the `/dashboard` and `/create-page` routes in the Prizm application. Through detailed code analysis, we've identified critical performance issues that compound to create noticeable delays, even with a small dataset (1 user, ~10-15 projects).
 
@@ -76,10 +93,59 @@ For a single dashboard load:
 2. Modify `onAuthenticateUser()` to use the cache
 3. Pass user context through Server Components props
 
-#### Phase 2: Consolidate Data Fetching (Medium Risk)
-1. Fetch all projects once in the layout
-2. Derive recent projects from the full list in-memory
-3. Pass projects data down through props
+#### Phase 2: Implement Initial Pagination (Medium Risk)
+
+**Goal**: Replace the current "load all projects at once" approach with a progressive loading system that improves initial page load speed and user experience.
+
+**Detailed Implementation Plan**:
+
+1. **Modify Recent Projects Logic**:
+   - Change `getRecentProjects()` to fetch first 4 projects instead of 5
+   - Use this as the initial dashboard load for immediate display
+   - This provides instant visual feedback while remaining projects load
+
+2. **Implement Paginated Project Fetching**:
+   - Create new `getProjectsPaginated(page: number, limit: number)` function
+   - First page loads 4 projects (for sidebar + initial dashboard display)
+   - Subsequent pages load 12 projects each (3 rows × 4 columns grid)
+   - Use cursor-based pagination for consistent performance at scale
+
+3. **Dashboard Loading Strategy**:
+   ```
+   Initial Request → First 4 projects displayed immediately
+                 → Skeleton placeholders for next 8 projects (2 more rows)
+                 → "Load More" button appears below first 12 slots
+   
+   User clicks "Load More" → Next 12 projects load with skeleton states
+                           → Process repeats for additional batches
+   ```
+
+4. **UI/UX Implementation**:
+   - **Skeleton Loaders**: Match existing project card dimensions and styling
+   - **Load More Button**: 
+     - Centered position with glass effect (matches light/dark theme)
+     - Shows loading spinner during fetch
+     - Becomes disabled when no more projects available
+   - **Progressive Enhancement**: Works without JavaScript (server-side pagination fallback)
+
+5. **Data Architecture Changes**:
+   - Remove `getAllProjects()` call from dashboard page completely
+   - Eliminate "recent" vs "all" projects redundancy
+   - Single source of truth: paginated project fetching
+   - Sidebar "recent projects" uses same first 4 projects from dashboard
+
+**Expected Performance Benefits**:
+- **Initial load time**: Reduced by 60-70% (loading 4 vs 15+ projects)
+- **Data transfer**: Reduced by 70-80% on first load
+- **Perceived performance**: Immediate visual feedback vs blank loading state
+- **Scalability**: Handles 100s of projects without performance degradation
+- **Memory usage**: Lower baseline, grows incrementally as user needs
+
+**Technical Considerations**:
+- Maintain existing authentication caching from Phase 1
+- Compatible with future thumbnail system (Stage 2)
+- Prepared for client-side caching (Stage 4)
+- SEO-friendly with proper server-side rendering for first 4 projects
 
 #### Phase 3: Implement Proper Caching (Higher Impact)
 1. Add Next.js Data Cache with appropriate revalidation

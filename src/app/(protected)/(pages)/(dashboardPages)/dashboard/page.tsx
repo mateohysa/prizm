@@ -1,15 +1,8 @@
 
-import { getAllProjects } from '@/actions/project'
-import { getCachedAuthenticatedUser } from '@/actions/user'
 import React from 'react'   
-import NotFound from '@/components/global/not-found'
-import Projects from '@/components/global/projects'
-import ProjectCard from '@/components/global/project-card'
+import PaginatedProjects from '@/components/global/projects/paginated'
 
 const DashboardPage = async () => {
-    // Use cached authentication to avoid redundant DB calls
-    const authenticatedUser = await getCachedAuthenticatedUser()
-    const allProjects = await getAllProjects(authenticatedUser)
     return (
     <div className="w-full flex flex-col gap-6 relative md:p-0 p-4">
       <div className="flex flex-col-reverse 
@@ -22,14 +15,8 @@ const DashboardPage = async () => {
             </h1>
         </div>
       </div>
-      {/* {Projects} */}
 
-      
-      {allProjects.projects && allProjects.projects.length > 0 ?(
-        <Projects projects={allProjects.projects}/>
-      ) :
-     <NotFound/> 
-      }
+      <PaginatedProjects />
     </div>
   )
 }

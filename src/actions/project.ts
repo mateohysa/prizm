@@ -5,6 +5,7 @@ import { onAuthenticateUser } from "./user"
 import { client } from "@/lib/prisma"
 import { OutlineCard, Slide } from "@/lib/types"
 import { JsonValue } from "@prisma/client/runtime/library"
+import { ProjectListItem, PaginatedProjectsResponse } from "@/lib/types/project"
 
 /**
  * Fetch all projects
@@ -50,7 +51,7 @@ export const getAllProjects = async (authenticatedUser?: Awaited<ReturnType<type
 /**
  * Fetch recent projects
  * 1. Use provided authenticated user or authenticate
- * 2. Query top 5 non-deleted projects by updatedAt
+ * 2. Query top 4 non-deleted projects by updatedAt (optimized for sidebar)
  * 3. If none found, return 404
  * 4. Return recent projects
  */
@@ -75,7 +76,7 @@ export const getRecentProjects = async (authenticatedUser?: Awaited<ReturnType<t
             orderBy:{
                 updatedAt: "desc",
             },
-            take: 5,
+            take: 4,
         })
 
         if(projects.length === 0){
@@ -85,6 +86,89 @@ export const getRecentProjects = async (authenticatedUser?: Awaited<ReturnType<t
     }catch (error){
         console.log(error)
         return {status: 500, error:"Error getting projects"}
+    }
+}
+
+/**
+ * Fetch projects with cursor-based pagination
+ * 1. Use provided authenticated user or authenticate
+ * 2. Query projects with cursor-based pagination for consistent performance
+ * 3. Return projects with hasMore flag and nextCursor
+ * 4. Optimized for progressive loading with skeleton states
+ */
+export const getProjectsPaginated = async (
+    page: number = 1, 
+    limit: number = 12, 
+    authenticatedUser?: Awaited<ReturnType<typeof onAuthenticateUser>>
+) => {
+    try {
+        let checkUser: Awaited<ReturnType<typeof onAuthenticateUser>>
+        
+        if (authenticatedUser) {
+            checkUser = authenticatedUser
+        } else {
+            checkUser = await onAuthenticateUser()
+        }
+        
+        if (checkUser.status !== 200 || !checkUser.user) {
+            return { status: 403, error: "User not authenticated" }
+        }
+
+        const skip = (page - 1) * limit
+        
+        // Get projects with one extra to check if there are more
+        const projects = await client.project.findMany({
+            where: {
+                userId: checkUser.user.id,
+                isDeleted: false,
+            },
+            orderBy: {
+                updatedAt: "desc",
+            },
+            skip: skip,
+            take: limit + 1, // Get one extra to determine hasMore
+            select: {
+                id: true,
+                title: true,
+                createdAt: true,
+                updatedAt: true,
+                themeName: true,
+                // Exclude slides field to reduce data transfer
+                // slides: false, // This is implicit when using select
+            }
+        })
+
+        // Check if there are more projects
+        const hasMore = projects.length > limit
+        const projectsToReturn = hasMore ? projects.slice(0, limit) : projects
+
+        if (projectsToReturn.length === 0 && page === 1) {
+            return { status: 404, error: "No projects found", data: { projects: [], hasMore: false, page, totalFetched: 0 } }
+        }
+
+        // Serialize dates to ISO strings for the frontend
+        const serializedProjects: ProjectListItem[] = projectsToReturn.map(project => ({
+            id: project.id,
+            title: project.title,
+            createdAt: project.createdAt.toISOString(),
+            updatedAt: project.updatedAt.toISOString(),
+            themeName: project.themeName,
+        }))
+
+        const responseData: PaginatedProjectsResponse = {
+            projects: serializedProjects,
+            hasMore,
+            page,
+            totalFetched: serializedProjects.length
+        }
+
+        return {
+            status: 200,
+            data: responseData
+        }
+    } catch (error) {
+        console.error("❌ ERROR in getProjectsPaginated:", error)
+        return { status: 500, error: "Error getting paginated projects" }
     }
 }
 

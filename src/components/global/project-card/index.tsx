@@ -19,13 +19,17 @@ type Props = {
     themeName: string
     isDeleted: boolean
     slideData: JsonValue
+    onOptimisticDelete?: (projectId: string) => Promise<void>
+    onOptimisticRecover?: (projectId: string) => Promise<void>
 }
 const ProjectCard = ({projectId, 
                     title, 
                     createdAt, 
                     themeName,
                     isDeleted, 
-                    slideData, 
+                    slideData,
+                    onOptimisticDelete,
+                    onOptimisticRecover, 
                 }: Props) => {
 
         const [loading, setLoading] = useState(false)
@@ -33,57 +37,71 @@ const ProjectCard = ({projectId,
         const {setSlides} = useSlideStore()
         const router = useRouter()
         const handleNavigation = () => {
-            if (slideData && Array.isArray(slideData)) {
-                const slides = slideData as unknown as Slide[]
-                setSlides(slides) // Remove JSON.parse(JSON.stringify())
-                router.push(`/presentation/${projectId}`)
-            } else {
-                console.warn('Invalid slide data for project:', projectId)
-            }
+            router.push(`/presentation/${projectId}`)
         }
         const theme = themes.find((theme) => theme.name === themeName) || themes[0]
         
         //method for handling project recovery
         const handleRecover = async () => {
             setLoading(true)
+            setOpen(false)
+            
             if(!projectId){
                 setLoading(false)
                 toast.error('Error!', {description: 'Project not found.'})
                 return
             }
+            
             try {
-                const res = await recoverProject(projectId)
-                if(res.status !== 200){
-                    toast.error('Error!', {description: 'Something went wrong.'})
-                    return
+                if (onOptimisticRecover) {
+                    // Use optimistic UI if callback provided
+                    await onOptimisticRecover(projectId)
+                } else {
+                    // Fallback to server action + refresh
+                    const res = await recoverProject(projectId)
+                    if(res.status !== 200){
+                        toast.error('Error!', {description: 'Something went wrong.'})
+                        return
+                    }
+                    router.refresh()
+                    toast.success('Success!', {description: 'Project recovered.'})
                 }
-                setOpen(false)
-                router.refresh()
-                toast.success('Success!', {description: 'Project recovered.'})
             } catch (error) {
                 toast.error('Error!', {description: 'Something went wrong.'})
+            } finally {
+                setLoading(false)
             }
         }
 
         //method for handling project deletion
         const handleDelete = async () => {
             setLoading(true)
+            setOpen(false)
+            
             if(!projectId){
                 setLoading(false)
                 toast.error('Error!', {description: 'Project not found.'})
                 return
             }
+            
             try {
-                const res = await deleteProject(projectId)
-                if(res.status !== 200){
-                    toast.error('Error!', {description: 'Failed to delete project.'})
-                    return
+                if (onOptimisticDelete) {
+                    // Use optimistic UI if callback provided
+                    await onOptimisticDelete(projectId)
+                } else {
+                    // Fallback to server action + refresh
+                    const res = await deleteProject(projectId)
+                    if(res.status !== 200){
+                        toast.error('Error!', {description: 'Failed to delete project.'})
+                        return
+                    }
+                    router.refresh()
+                    toast.success('Success!', {description: 'Project deleted.'})
                 }
-                setOpen(false)
-                router.refresh()
-                toast.success('Success!', {description: 'Project deleted.'})
             } catch (error) {
                 toast.error('Error!', {description: 'Something went wrong.'})
+            } finally {
+                setLoading(false)
             }
         }
   return (
