@@ -1,6 +1,14 @@
 import { onAuthenticateUser } from "./user"
 import lemonSqueezyClient from "@/lib/axios"
 
+/**
+ * Create subscription checkout via Lemon Squeezy API
+ * 1. Authenticate user to ensure authorized access
+ * 2. Build checkout payload with user ID, store, and variant data
+ * 3. Send POST request to Lemon Squeezy checkouts endpoint
+ * 4. Extract checkout URL from API response
+ * 5. Return checkout URL for user redirection or error
+ */
 export const buySubscription = async (buyUserId: string) => {
     try{
         const checkUser = await onAuthenticateUser()

@@ -580,6 +580,13 @@ const existingLayouts = [
     },
   ];
 
+/**
+ * Generate image URL using Gemini 2.0 Flash image generation
+ * 1. Build photorealistic prompt for professional presentation images
+ * 2. Make POST request to Gemini image generation API
+ * 3. Parse response for base64 image data
+ * 4. Return data URL or fallback to default Unsplash image on error
+ */
 const generateImageUrl = async (prompt: string): Promise<string> => {
   try {
     const improvedPrompt = `    

@@ -301,6 +301,13 @@ export const getProjectById = async (projectId: string) => {
         return {status: 500, error: "Internal server error when finding project (outer)"}
     }
 }
+/**
+ * Update project slides
+ * 1. Validate projectId and slides inputs
+ * 2. Update project record with new slides data
+ * 3. If update fails, return error
+ * 4. Return updated project data
+ */
 export const updateSlides = async (projectId: string, slides: JsonValue[]) => {
     try{
         if(!projectId || !slides){
@@ -324,6 +331,13 @@ export const updateSlides = async (projectId: string, slides: JsonValue[]) => {
     }
 }
 
+/**
+ * Update project theme
+ * 1. Validate projectId and theme inputs
+ * 2. Update project record with new theme name
+ * 3. If update fails, return error
+ * 4. Return updated project data
+ */
 export const updateProjectTheme = async (projectId: string, theme: string) => {
     try{
         if(!projectId || !theme){
@@ -348,6 +362,14 @@ export const updateProjectTheme = async (projectId: string, theme: string) => {
 }
 
 
+/**
+ * Permanently delete multiple projects (hard delete)
+ * 1. Authenticate user
+ * 2. Validate projectIds array input
+ * 3. Find projects belonging to user for security check
+ * 4. Permanently delete validated projects from database
+ * 5. Return deletion count and success message
+ */
 export const deleteAllProjects = async (projectIds: string[]) => {
     try {
         const checkUser = await onAuthenticateUser()
@@ -476,7 +498,12 @@ export const getDeletedProjectsPaginated = async (
 }
 
 /**
- * Legacy function - kept for backward compatibility
+ * Legacy function - fetch all deleted projects (kept for backward compatibility)
+ * 1. Authenticate user
+ * 2. Query all soft-deleted projects ordered by updatedAt
+ * 3. If none found, return error with empty data
+ * 4. Return all deleted projects (no pagination)
+ * Note: Consider using getDeletedProjectsPaginated for better performance
  */
 export const getDeletedProjects = async () => {
      try {
