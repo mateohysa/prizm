@@ -12,6 +12,116 @@ import { Images } from "lucide-react"
 // WILL PROBABLY NEED TO MAKE THIS MULTI TURN CHAT
 
 /**
+ * Extract text content from slide structure
+ * Recursively traverses the slide content to find all text-based content
+ */
+const extractTextFromContent = (content: any): string[] => {
+  const textParts: string[] = []
+  
+  if (!content) return textParts
+  
+  // If content has a 'content' property that's a string, extract it
+  if (typeof content.content === 'string' && content.content.trim()) {
+    textParts.push(content.content.trim())
+  }
+  
+  // If content has a placeholder that's a string, extract it
+  if (typeof content.placeholder === 'string' && content.placeholder.trim() && content.placeholder !== 'start typing here') {
+    textParts.push(content.placeholder.trim())
+  }
+  
+  // If content has an array of children, recurse
+  if (Array.isArray(content.content)) {
+    content.content.forEach((child: any) => {
+      textParts.push(...extractTextFromContent(child))
+    })
+  }
+  
+  // If content itself is an array, recurse
+  if (Array.isArray(content)) {
+    content.forEach((child: any) => {
+      textParts.push(...extractTextFromContent(child))
+    })
+  }
+  
+  // If content has nested content object, recurse
+  if (content.content && typeof content.content === 'object' && !Array.isArray(content.content)) {
+    textParts.push(...extractTextFromContent(content.content))
+  }
+  
+  return textParts
+}
+
+/**
+ * Generate a concise project title using Gemini
+ * Uses the original user prompt and first slide content for context
+ */
+export const generateProjectTitle = async (userPrompt: string, firstSlide: Slide | null): Promise<{status: number, title?: string, error?: string}> => {
+  try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "")
+    
+    // Extract text content from first slide
+    let slideText = ''
+    if (firstSlide) {
+      const textParts = extractTextFromContent(firstSlide.content)
+      slideText = textParts.join(' ').slice(0, 500) // Limit context length
+    }
+    
+    const titlePrompt = `
+You are a helpful AI assistant that creates concise, professional titles for presentations.
+
+Original user prompt: "${userPrompt}"
+First slide content: "${slideText}"
+
+Based on the user's prompt and the content of their first slide, generate a professional, descriptive title for their presentation.
+
+IMPORTANT REQUIREMENTS:
+- Title must be 3-5 words maximum (in rare cases 6 words is acceptable)
+- Title should be professional and suitable for business/educational presentations
+- Title should capture the main topic or theme
+- Do NOT include quotation marks or special characters
+- Keep it concise and impactful
+
+Examples of good titles:
+- "Marketing Strategy Overview"
+- "Digital Transformation Guide"
+- "Budget Planning 2024"
+- "Team Performance Metrics"
+- "Product Launch Strategy"
+
+Return ONLY the title text, nothing else.`
+    
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
+    const result = await model.generateContent(titlePrompt)
+    const response = result.response
+    
+    if (response) {
+      let title = response.text().trim()
+      
+      // Clean up the response
+      title = title.replace(/^["']|["']$/g, '') // Remove quotes
+      title = title.replace(/\n[\s\S]*/g, '') // Remove everything after first line
+      title = title.trim()
+      
+      // Validate title length (word count)
+      const wordCount = title.split(' ').filter(word => word.length > 0).length
+      
+      if (title && wordCount >= 1 && wordCount <= 6) {
+        return { status: 200, title }
+      } else {
+        console.warn(`Generated title has ${wordCount} words: "${title}"`, 'Using fallback.')
+        return { status: 400, error: 'Generated title length invalid' }
+      }
+    }
+    
+    return { status: 400, error: 'No response from Gemini API' }
+  } catch (error) {
+    console.error('Error generating project title:', error)
+    return { status: 500, error: 'Failed to generate title' }
+  }
+}
+
+/**
  * Generate AI outlines
  * 1. Initialize GoogleGenerativeAI with API key
  * 2. Build prompt instructing outline creation
@@ -894,14 +1004,38 @@ export const generateLayouts = async (projectId: string, theme: string) => {
 
         console.log("🎉 Slide processing complete!")
 
+        // 🆕 Generate project title after slides are processed
+        console.log("🎯 Generating project title...")
+        let generatedTitle = project.title // Fallback to current title
+        
+        try {
+            // Create context from project outlines since we don't have original prompt
+            const outlinesContext = project.outlines.join('. ')
+            const titleResult = await generateProjectTitle(outlinesContext, processedSlides[0] || null)
+            if (titleResult.status === 200 && titleResult.title) {
+                generatedTitle = titleResult.title
+                console.log(`✅ Generated title: "${generatedTitle}"`)
+            } else {
+                console.warn(`⚠️ Title generation failed, using current title: "${generatedTitle}"`)
+            }
+        } catch (error) {
+            console.error("❌ Error generating title:", error)
+            console.log(`🔄 Falling back to current title: "${generatedTitle}"`)
+        }
+
+        // Update project with slides, theme, and generated title
         await client.project.update({
             where: {
                 id: projectId
             },
             data: {
-                slides: processedSlides, themeName: theme
+                slides: processedSlides, 
+                themeName: theme,
+                title: generatedTitle // Save the generated title
             }
         })
+        
+        console.log(`📝 Project updated with title: "${generatedTitle}"`)
         return {status: 200, data: processedSlides}
     }catch(error){
         console.error("❌ ERROR:", error)

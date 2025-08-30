@@ -9,7 +9,7 @@ import LayoutPreview from "./editor-sidebar/LeftSidebar/LayoutPreview"
 import Editor from "./editor/Editor"
 import EditorSidebar from "./editor-sidebar/RightSidebar"
 import { Slide } from "@/lib/types"
-import { Project } from "@prisma/client"
+import { Project } from "@/generated/prisma"
 
 type Props = {
     project: Project

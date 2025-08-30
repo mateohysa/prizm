@@ -52,7 +52,7 @@ export const getPagedPrompts = async (page: number = 1, limit: number = 5) => {
       id: prompt.id,
       createdAt: prompt.createdAt.toISOString(),
       title: prompt.title,
-      outlines: prompt.outlines as OutlineCard[] || []
+      outlines: (prompt.outlines as unknown as OutlineCard[]) || []
     }))
 
     return {
@@ -92,7 +92,7 @@ export const savePromptToDB = async (prompt: Prompt) => {
       data: {
         id: prompt.id,
         title: prompt.title,
-        outlines: prompt.outlines,
+        outlines: prompt.outlines as any,
         userId: checkUser.user.id,
         createdAt: new Date(prompt.createdAt),
       }
@@ -107,7 +107,7 @@ export const savePromptToDB = async (prompt: Prompt) => {
       id: createdPrompt.id,
       createdAt: createdPrompt.createdAt.toISOString(),
       title: createdPrompt.title,
-      outlines: createdPrompt.outlines as OutlineCard[] || []
+      outlines: (createdPrompt.outlines as unknown as OutlineCard[]) || []
     }
 
     return { status: 200, data: transformedPrompt }
@@ -148,7 +148,7 @@ export const migratePromptToDB = async (prompt: Prompt) => {
       data: {
         id: prompt.id,
         title: prompt.title,
-        outlines: prompt.outlines,
+        outlines: prompt.outlines as any,
         userId: checkUser.user.id,
         createdAt: new Date(prompt.createdAt),
       }

@@ -2,23 +2,22 @@
 import React, { useState } from 'react'
 import { JsonValue } from '@prisma/client/runtime/library'
 import { motion } from 'framer-motion'
-import { itemVariants, themes, timeAgo } from '@/lib/constants'
+import { itemVariants, timeAgo } from '@/lib/constants'
 import { useSlideStore } from '@/store/useSlideStore'
-import ThumbnailPreview from './thumbnail-preview'
+import ProjectThumbnail from './project-thumbnail'
 import { useRouter } from 'next/navigation'
 import AlertDialogBox from '../alert-dialog'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { deleteProject, recoverProject } from '@/actions/project'
 import { Trash2 } from 'lucide-react'
-import { Slide } from '@/lib/types'
 type Props = {
     projectId: string
     title: string
     createdAt: string
     themeName: string
     isDeleted: boolean
-    slideData: JsonValue
+    slideData: JsonValue | null // Made optional for new thumbnail system
     onOptimisticDelete?: (projectId: string) => Promise<void>
     onOptimisticRecover?: (projectId: string) => Promise<void>
 }
@@ -39,7 +38,6 @@ const ProjectCard = ({projectId,
         const handleNavigation = () => {
             router.push(`/presentation/${projectId}`)
         }
-        const theme = themes.find((theme) => theme.name === themeName) || themes[0]
         
         //method for handling project recovery
         const handleRecover = async () => {
@@ -115,8 +113,10 @@ const ProjectCard = ({projectId,
         <div className='relative aspect-[16/9] rounded-lg cursor-pointer overflow-hidden'
         onClick={handleNavigation}
         >
-            <ThumbnailPreview theme={theme} 
-            slide={JSON.parse(JSON.stringify(slideData))?. [0]}
+            <ProjectThumbnail 
+                projectId={projectId}
+                title={title}
+                themeName={themeName}
             />
         </div>
         <div className='w-full'>
