@@ -17,3 +17,17 @@ export type PaginatedProjectsResponse = {
   page: number
   totalFetched: number
 }
+
+/**
+ * Deleted project type for trash page - extends ProjectListItem with isDeleted flag
+ */
+export type DeletedProjectListItem = ProjectListItem & {
+  isDeleted: true // Always true for deleted projects
+}
+
+export type PaginatedDeletedProjectsResponse = {
+  projects: DeletedProjectListItem[]
+  hasMore: boolean
+  page: number
+  totalFetched: number
+}

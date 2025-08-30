@@ -1,11 +1,12 @@
 'use client'
-import { Project } from '@/generated/prisma'
 import React from 'react'
 import { motion } from 'framer-motion'
 import { containerVariants } from '@/lib/constants'
 import ProjectCard from '../project-card'
+import { ProjectListItem, DeletedProjectListItem } from '@/lib/types/project'
+
 type Props = {
-    projects: Project[]
+    projects: (ProjectListItem | DeletedProjectListItem)[]
 }
 
 const Projects = ({projects}: Props) => {
@@ -19,12 +20,12 @@ const Projects = ({projects}: Props) => {
         {projects.map((project, index) => (
             <ProjectCard 
             key={project.id} 
-            projectId={project?.id}
-            title={project?.title}
-            createdAt={project?.createdAt.toString()}
-            isDeleted={project?.isDeleted}
-            slideData={project?.slides}
-            themeName={project?.themeName}
+            projectId={project.id}
+            title={project.title}
+            createdAt={project.createdAt} // Already a string from our types
+            isDeleted={'isDeleted' in project ? project.isDeleted : false} // Handle both types
+            slideData={null} // We don't load slides for list view performance
+            themeName={project.themeName || 'default'}
             />
         ))}
     </motion.div>
