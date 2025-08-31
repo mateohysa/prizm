@@ -1,7 +1,7 @@
 'use client'
 import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { containerVariants } from '@/lib/constants'
+import { optimizedContainerVariants } from '@/lib/constants'
 import ProjectCard from '../project-card'
 import ProjectCardSkeleton from '../project-card/skeleton'
 import LoadMoreButton from '../load-more-button'
@@ -55,9 +55,10 @@ const PaginatedProjects = () => {
     <div className="w-full">
       <motion.div 
         className='grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-4 gap-4'
-        variants={containerVariants}
+        variants={optimizedContainerVariants}
         initial="hidden"
         animate="visible"
+        viewport={{ once: true, amount: 0.1 }} // Only animate once when 10% is visible
       >
         {/* Show initial skeleton loaders */}
         {isLoading && renderSkeletons(8)}

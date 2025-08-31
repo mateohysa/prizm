@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import { JsonValue } from '@prisma/client/runtime/library'
 import { motion } from 'framer-motion'
-import { itemVariants, timeAgo } from '@/lib/constants'
+import { optimizedItemVariants, timeAgo } from '@/lib/constants'
 import { useSlideStore } from '@/store/useSlideStore'
 import ProjectThumbnail from './project-thumbnail'
 import { useRouter } from 'next/navigation'
@@ -104,11 +104,20 @@ const ProjectCard = ({projectId,
         }
   return (
     <motion.div
-    variants={itemVariants}
-    
+    variants={optimizedItemVariants}
+    style={{ willChange: 'transform, opacity' }} // Optimize for animations
+    whileHover={{ scale: 1.02 }} // Subtle hover effect
+    transition={{ duration: 0.2 }}
     className={`group w-full flex flex-col gap-y-3 rounded-xl p-3 border bg-white/60 dark:bg-white/10 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 shadow-lg shadow-black/10 border-gray-200 dark:border-transparent transition-colors
     ${!isDeleted && 'hover:backdrop-blur-lg hover:bg-white/70 dark:hover:bg-white/15'}
     `}
+    onAnimationComplete={() => {
+        // Remove will-change after animation to free memory
+        if (typeof window !== 'undefined') {
+            const element = document.currentScript?.parentElement;
+            if (element) element.style.willChange = 'auto';
+        }
+    }}
     >
         <div className='relative aspect-[16/9] rounded-lg cursor-pointer overflow-hidden'
         onClick={handleNavigation}
