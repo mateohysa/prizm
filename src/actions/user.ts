@@ -61,3 +61,38 @@ export const onAuthenticateUser = async () => {
 
 // Cached version of onAuthenticateUser to prevent redundant database calls within the same request
 export const getCachedAuthenticatedUser = cache(onAuthenticateUser)
+
+/**
+ * Get user by Clerk ID - for use in API routes where auth is already done
+ * This avoids calling currentUser() again
+ */
+export const getUserByClerkId = async (clerkId: string) => {
+    try {
+        const userExists = await client.user.findUnique({
+            where: {
+                clerkId: clerkId,
+            },
+            include: {
+                PurchasedProjects: {
+                    select: {
+                        id: true,
+                    },
+                },
+            },
+        })
+
+        if (userExists) {
+            return { status: 200, user: userExists }
+        }
+
+        // User doesn't exist in our DB yet - this shouldn't happen if middleware is working
+        // but we return a clear error
+        return { status: 404, error: "User not found in database" }
+    } catch (e) {
+        console.log(e)
+        return { status: 500, error: "Database error" }
+    }
+}
+
+// Cached version to use within the same request
+export const getCachedUserByClerkId = cache(getUserByClerkId)

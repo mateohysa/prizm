@@ -1,93 +1,34 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { containerVariants } from '@/lib/constants'
 import ProjectCard from '../project-card'
 import ProjectCardSkeleton from '../project-card/skeleton'
 import LoadMoreButton from '../load-more-button'
-import { toast } from 'sonner'
-import { ProjectListItem, PaginatedProjectsResponse } from '@/lib/types/project'
+import { useInfiniteProjects, useDeleteProject } from '@/hooks/use-projects'
+import { ProjectListItem } from '@/lib/types/project'
 
-type Props = {
-  initialProjects?: ProjectListItem[]
-  initialHasMore?: boolean
-}
+const PaginatedProjects = () => {
+  // Use React Query's infinite query hook for pagination
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    isLoading,
+    isError
+  } = useInfiniteProjects(8)
 
-const PaginatedProjects = ({ initialProjects, initialHasMore }: Props) => {
-  const [projects, setProjects] = useState<ProjectListItem[]>(initialProjects || [])
-  const [hasMore, setHasMore] = useState(initialHasMore ?? true)
-  const [loading, setLoading] = useState(false)
-  const [initialLoading, setInitialLoading] = useState(!initialProjects) // Show skeletons if no initial data
-  const [page, setPage] = useState(initialProjects ? 2 : 1) // Start from page 1 if no initial data
+  // Use the delete mutation hook
+  const deleteProject = useDeleteProject()
 
-  // Load initial data if not provided
-  useEffect(() => {
-    if (!initialProjects) {
-      loadInitialData()
-    }
-  }, [])
-
-  const loadInitialData = async () => {
-    setInitialLoading(true)
-    try {
-      const response = await fetch('/api/projects/paginated?page=1&limit=8')
-      
-      if (response.ok) {
-        const result = await response.json()
-        setProjects(result.projects)
-        setHasMore(result.hasMore)
-        setPage(2) // Next page will be 2
-      } else if (response.status === 404) {
-        // No projects found
-        setProjects([])
-        setHasMore(false)
-      } else {
-        const errorData = await response.json()
-        toast.error('Error loading projects', {
-          description: errorData.error || 'Failed to load projects'
-        })
-      }
-    } catch (error) {
-      console.error('Error loading initial projects:', error)
-      toast.error('Error loading projects', {
-        description: 'Something went wrong while loading projects'
-      })
-    } finally {
-      setInitialLoading(false)
-    }
-  }
-
-  const loadMore = async () => {
-    if (loading) return
-    
-    setLoading(true)
-    
-    try {
-      const response = await fetch(`/api/projects/paginated?page=${page}&limit=8`)
-      
-      if (response.ok) {
-        const result = await response.json()
-        setProjects(prev => [...prev, ...result.projects])
-        setHasMore(result.hasMore)
-        setPage(prev => prev + 1)
-      } else if (response.status === 404) {
-        // No more projects
-        setHasMore(false)
-      } else {
-        const errorData = await response.json()
-        toast.error('Error loading projects', {
-          description: errorData.error || 'Failed to load more projects'
-        })
-      }
-    } catch (error) {
-      console.error('Error loading more projects:', error)
-      toast.error('Error loading projects', {
-        description: 'Something went wrong while loading more projects'
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Flatten all pages into a single array of projects
+  const projects = useMemo(
+    () => data?.pages.flatMap(page => page.projects) ?? [],
+    [data]
+  )
 
   const renderSkeletons = (count: number) => {
     return Array.from({ length: count }).map((_, index) => (
@@ -95,50 +36,19 @@ const PaginatedProjects = ({ initialProjects, initialHasMore }: Props) => {
     ))
   }
 
-  // Optimistic UI handlers
+  // Optimistic delete handler using React Query mutation
   const handleOptimisticDelete = async (projectId: string) => {
-    // Optimistically remove project from local state
-    const originalProjects = projects
-    setProjects(prev => prev.filter(p => p.id !== projectId))
-
-    try {
-      const res = await fetch('/api/projects/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId })
-      })
-
-      if (!res.ok) {
-        throw new Error('Failed to delete project')
-      }
-
-      toast.success('Success!', { description: 'Project deleted.' })
-    } catch (error) {
-      // Rollback on failure
-      setProjects(originalProjects)
-      toast.error('Error!', { description: 'Failed to delete project.' })
-    }
+    deleteProject.mutate(projectId)
   }
 
-  const handleOptimisticRecover = async (projectId: string) => {
-    // For recover, we don't show deleted projects in this component
-    // so we don't need to handle this case here
-    // This would be handled in a different component that shows deleted projects
-    try {
-      const res = await fetch('/api/projects/recover', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId })
-      })
-
-      if (!res.ok) {
-        throw new Error('Failed to recover project')
-      }
-
-      toast.success('Success!', { description: 'Project recovered.' })
-    } catch (error) {
-      toast.error('Error!', { description: 'Failed to recover project.' })
-    }
+  // Handle error states
+  if (isError) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-500">Error loading projects</p>
+        <p className="text-sm text-muted-foreground">{error?.message}</p>
+      </div>
+    )
   }
 
   return (
@@ -150,33 +60,33 @@ const PaginatedProjects = ({ initialProjects, initialHasMore }: Props) => {
         animate="visible"
       >
         {/* Show initial skeleton loaders */}
-        {initialLoading && renderSkeletons(8)}
+        {isLoading && renderSkeletons(8)}
         
         {/* Render actual projects */}
-        {!initialLoading && projects.map((project) => (
+        {!isLoading && projects.map((project) => (
           <ProjectCard 
             key={project.id} 
             projectId={project.id}
             title={project.title}
             createdAt={project.createdAt}
-            isDeleted={false} // Paginated results only show non-deleted projects
-            slideData={null} // We're not loading slides for list view (performance optimization)
+            isDeleted={false}
+            slideData={null}
             themeName={project.themeName || 'default'}
             onOptimisticDelete={handleOptimisticDelete}
-            onOptimisticRecover={handleOptimisticRecover}
+            onOptimisticRecover={() => {}} // Not needed in dashboard view
           />
         ))}
         
         {/* Render skeleton loaders while loading more */}
-        {!initialLoading && loading && renderSkeletons(8)}
+        {!isLoading && isFetchingNextPage && renderSkeletons(8)}
       </motion.div>
       
-      {/* Load More Button */}
-      {!initialLoading && (
+      {/* Load More Button with React Query state */}
+      {!isLoading && (
         <LoadMoreButton 
-          loading={loading}
-          hasMore={hasMore}
-          onClick={loadMore}
+          loading={isFetchingNextPage}
+          hasMore={hasNextPage ?? false}
+          onClick={() => fetchNextPage()}
         />
       )}
     </div>

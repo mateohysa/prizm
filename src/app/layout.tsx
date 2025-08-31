@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/provider/theme-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { Toaster } from "sonner";
+import { QueryProvider } from "@/providers/query-provider";
 
 export const metadata: Metadata = {
   title: "prizm",
@@ -43,8 +44,10 @@ export default function RootLayout({
           }}
         />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-        {children}
-        <Toaster />
+          <QueryProvider>
+            {children}
+          </QueryProvider>
+          <Toaster />
         </ThemeProvider>
         
       </body>

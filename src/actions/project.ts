@@ -174,14 +174,24 @@ export const getProjectsPaginated = async (
 
 /**
  * Recover deleted project
- * 1. Authenticate user
+ * 1. Use provided authenticated user or authenticate
  * 2. Update isDeleted flag to false
  * 3. If update fails, return error
  * 4. Return success message
  */
-export const recoverProject = async (projectId: string) => {
+export const recoverProject = async (
+    projectId: string,
+    authenticatedUser?: Awaited<ReturnType<typeof onAuthenticateUser>>
+) => {
     try {
-        const checkUser = await onAuthenticateUser()
+        let checkUser: Awaited<ReturnType<typeof onAuthenticateUser>>
+        
+        if (authenticatedUser) {
+            checkUser = authenticatedUser
+        } else {
+            checkUser = await onAuthenticateUser()
+        }
+        
         if(checkUser.status!== 200 || !checkUser.user){
             return {status: 403, error:"User not authenticated"}
         }
@@ -205,14 +215,24 @@ export const recoverProject = async (projectId: string) => {
 
 /**
  * Soft delete project
- * 1. Authenticate user
+ * 1. Use provided authenticated user or authenticate
  * 2. Set isDeleted flag to true (soft delete)
  * 3. If update fails, return error
  * 4. Return success message
  */
-export const deleteProject = async (projectId: string) => {
+export const deleteProject = async (
+    projectId: string,
+    authenticatedUser?: Awaited<ReturnType<typeof onAuthenticateUser>>
+) => {
     try {
-        const checkUser = await onAuthenticateUser()
+        let checkUser: Awaited<ReturnType<typeof onAuthenticateUser>>
+        
+        if (authenticatedUser) {
+            checkUser = authenticatedUser
+        } else {
+            checkUser = await onAuthenticateUser()
+        }
+        
         if(checkUser.status!== 200 || !checkUser.user){
             return {status: 403, error:"User not authenticated"}
         }
