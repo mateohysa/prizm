@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query'
+import { useCallback } from 'react'
 import { toast } from 'sonner'
 import { ProjectListItem, PaginatedProjectsResponse } from '@/lib/types/project'
 
@@ -171,4 +172,52 @@ export function usePrefetchNextPage(currentPage: number, hasMore: boolean, limit
       staleTime: 5 * 60 * 1000,
     })
   }
+}
+
+// Fetch function for individual project
+async function fetchProjectById(projectId: string) {
+  const response = await fetch(`/api/projects/${projectId}`)
+  
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error('Project not found')
+    }
+    const error = await response.json()
+    throw new Error(error.error || 'Failed to fetch project')
+  }
+  
+  return response.json()
+}
+
+// Hook for fetching a single project
+export function useProject(projectId: string) {
+  return useQuery({
+    queryKey: ['project', projectId],
+    queryFn: () => fetchProjectById(projectId),
+    staleTime: 5 * 60 * 1000,
+    enabled: !!projectId, // Only fetch if projectId exists
+  })
+}
+
+// Hook to prefetch a project on hover
+export function usePrefetchProject() {
+  const queryClient = useQueryClient()
+  
+  return useCallback((projectId: string) => {
+    // Only prefetch if not already in cache or if stale
+    const existingData = queryClient.getQueryData(['project', projectId])
+    const queryState = queryClient.getQueryState(['project', projectId])
+    
+    // Check if data exists and is fresh
+    const isFresh = queryState?.dataUpdatedAt && 
+      Date.now() - queryState.dataUpdatedAt < 5 * 60 * 1000 // 5 minutes
+    
+    if (!existingData || !isFresh) {
+      queryClient.prefetchQuery({
+        queryKey: ['project', projectId],
+        queryFn: () => fetchProjectById(projectId),
+        staleTime: 5 * 60 * 1000,
+      })
+    }
+  }, [queryClient])
 }

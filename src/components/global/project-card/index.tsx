@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { deleteProject, recoverProject } from '@/actions/project'
 import { Trash2 } from 'lucide-react'
+import { usePrefetchProject } from '@/hooks/use-projects'
 type Props = {
     projectId: string
     title: string
@@ -35,8 +36,17 @@ const ProjectCard = ({projectId,
         const [open, setOpen] = useState(false)
         const {setSlides} = useSlideStore()
         const router = useRouter()
+        const prefetchProject = usePrefetchProject()
+        
         const handleNavigation = () => {
             router.push(`/presentation/${projectId}`)
+        }
+        
+        // Prefetch project data on hover for instant navigation
+        const handleMouseEnter = () => {
+            if (!isDeleted) { // Only prefetch for active projects
+                prefetchProject(projectId)
+            }
         }
         
         //method for handling project recovery
@@ -108,6 +118,7 @@ const ProjectCard = ({projectId,
     style={{ willChange: 'transform, opacity' }} // Optimize for animations
     whileHover={{ scale: 1.02 }} // Subtle hover effect
     transition={{ duration: 0.2 }}
+    onMouseEnter={handleMouseEnter} // Prefetch on hover
     className={`group w-full flex flex-col gap-y-3 rounded-xl p-3 border bg-white/60 dark:bg-white/10 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 shadow-lg shadow-black/10 border-gray-200 dark:border-transparent transition-colors
     ${!isDeleted && 'hover:backdrop-blur-lg hover:bg-white/70 dark:hover:bg-white/15'}
     `}
