@@ -161,6 +161,99 @@ export function useDeletedProjects(page: number = 1, limit: number = 8) {
   })
 }
 
+// Hook for infinite scrolling deleted projects
+export function useInfiniteDeletedProjects(limit: number = 8) {
+  return useInfiniteQuery({
+    queryKey: ['projects', 'deleted', 'infinite', limit],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await fetch(`/api/projects/deleted?page=${pageParam}&limit=${limit}`)
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          return { projects: [], hasMore: false, page: pageParam, totalFetched: 0 }
+        }
+        throw new Error('Failed to fetch deleted projects')
+      }
+      
+      return response.json() as Promise<PaginatedProjectsResponse>
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.hasMore) {
+        return allPages.length + 1
+      }
+      return undefined
+    },
+    initialPageParam: 1,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: true,
+  })
+}
+
+// Hook for deleting all projects permanently
+export function useDeleteAllProjects() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async (projectIds: string[]) => {
+      const res = await fetch('/api/projects/delete-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectIds })
+      })
+      
+      if (!res.ok) {
+        throw new Error('Failed to delete all projects')
+      }
+      
+      return res.json()
+    },
+    onMutate: async (projectIds) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['projects', 'deleted'] })
+      
+      // Snapshot the previous value
+      const previousData = queryClient.getQueriesData({ queryKey: ['projects', 'deleted'] })
+      
+      // Optimistically clear all deleted projects
+      queryClient.setQueriesData(
+        { queryKey: ['projects', 'deleted'] },
+        (old: any) => {
+          if (!old) return old
+          
+          // Handle infinite query data structure
+          if (old.pages) {
+            return {
+              ...old,
+              pages: [{ projects: [], hasMore: false, page: 1, totalFetched: 0 }]
+            }
+          }
+          
+          // Handle regular query data
+          return { projects: [], hasMore: false, page: 1, totalFetched: 0 }
+        }
+      )
+      
+      return { previousData }
+    },
+    onError: (err, projectIds, context) => {
+      // Rollback on failure
+      if (context?.previousData) {
+        context.previousData.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data)
+        })
+      }
+      toast.error('Error', { description: 'Unable to delete projects.' })
+    },
+    onSuccess: () => {
+      toast.success('Success!', { description: 'All projects deleted permanently.' })
+    },
+    onSettled: () => {
+      // Invalidate queries to ensure fresh data
+      queryClient.invalidateQueries({ queryKey: ['projects', 'deleted'] })
+    },
+  })
+}
+
 // Hook to prefetch next page (for better UX)
 export function usePrefetchNextPage(currentPage: number, hasMore: boolean, limit: number = 8) {
   const queryClient = useQueryClient()

@@ -9,9 +9,10 @@ import { DeletedProjectListItem } from '@/lib/types/project'
 type Props = {
     projects: DeletedProjectListItem[]
     onDeleteAll?: () => void // Callback to clear projects optimistically
+    disabled?: boolean
 }
 
-const DeleteAllButton = ({projects, onDeleteAll}: Props) => {
+const DeleteAllButton = ({projects, onDeleteAll, disabled}: Props) => {
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false)
 
@@ -72,7 +73,10 @@ const DeleteAllButton = ({projects, onDeleteAll}: Props) => {
     handleOpen={() => setOpen(!open)}
     open={open}
     >
-        <Button className='bg-background-80 rounded-lg dark:hover:bg-background-90 text-primary font-semibold hover:text-white'>
+        <Button 
+            disabled={disabled || loading}
+            className='bg-background-80 rounded-lg dark:hover:bg-background-90 text-primary font-semibold hover:text-white'
+        >
             <Trash />
             Delete All
         </Button>

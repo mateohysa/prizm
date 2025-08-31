@@ -1,72 +1,40 @@
 'use client'
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import DeleteAllButton from './_components/DeleteAllButton'
-import PaginatedDeletedProjects from '@/components/global/projects/paginated-deleted'
+import PaginatedDeletedProjectsRQ from '@/components/global/projects/paginated-deleted-rq'
 import NotFound from '@/components/global/not-found'
 import { DeletedProjectListItem } from '@/lib/types/project'
 import { Button } from '@/components/ui/button'
 import { RefreshCw } from 'lucide-react'
-import { toast } from 'sonner'
+import { useDeleteAllProjects } from '@/hooks/use-projects'
+import { useQueryClient } from '@tanstack/react-query'
 
 const Page = () => {
   const [currentProjects, setCurrentProjects] = useState<DeletedProjectListItem[]>([])
-  const [showNotFound, setShowNotFound] = useState(false)
-  const [componentKey, setComponentKey] = useState(0) // Force re-render when key changes
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const queryClient = useQueryClient()
+  const deleteAllMutation = useDeleteAllProjects()
 
   const handleProjectsChange = (projects: DeletedProjectListItem[]) => {
     setCurrentProjects(projects)
-    // Show NotFound only after initial load and if no projects
-    if (projects.length === 0) {
-      setShowNotFound(true)
-    } else {
-      setShowNotFound(false)
-    }
   }
 
   const handleDeleteAll = async () => {
-    console.log('🗑️ Delete All clicked - currentProjects:', currentProjects.length)
-    
     if(currentProjects.length === 0) {
-      toast.error("Error", {description:'No projects to delete'})
       return
     }
     
-    try {
-      // Call the actual delete API
-      const res = await fetch('/api/projects/delete-all', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          projectIds: currentProjects.map((project) => project.id) 
-        })
-      })
-
-      if (!res.ok) {
-        throw new Error('Failed to delete all projects')
-      }
-
-      // Clear all projects from view (optimistic UI)
-      setCurrentProjects([])
-      setShowNotFound(true)
-      
-      // Force remount the PaginatedDeletedProjects component by changing its key
-      console.log('🗑️ Forcing remount of PaginatedDeletedProjects')
-      setComponentKey(prev => prev + 1)
-      
-      toast.success("Success!", { 
-        description: `All projects deleted permanently.` 
-      })
-    } catch (error) {
-      console.error(error)
-      toast.error("Error", {description: "Unable to delete projects."})
-    }
+    // Use the mutation with optimistic updates
+    deleteAllMutation.mutate(
+      currentProjects.map(project => project.id)
+    )
   }
 
-  const handleRefresh = () => {
-    console.log('🔄 Manual refresh triggered')
-    setShowNotFound(false)
-    // Force refresh of paginated component
-    window.location.reload() // Simple solution for now
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    // Invalidate and refetch deleted projects using React Query
+    await queryClient.invalidateQueries({ queryKey: ['projects', 'deleted'] })
+    setIsRefreshing(false)
   }
 
   return (
@@ -80,24 +48,25 @@ const Page = () => {
             onClick={handleRefresh}
             variant="outline"
             size="sm"
+            disabled={isRefreshing}
             className='flex items-center gap-2'
           >
-            <RefreshCw className='w-4 h-4' />
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
           <DeleteAllButton 
             projects={currentProjects} 
             onDeleteAll={handleDeleteAll}
+            disabled={deleteAllMutation.isPending}
           />
         </div>
       </div>
       
-      <PaginatedDeletedProjects 
-        key={componentKey}
+      <PaginatedDeletedProjectsRQ 
         onProjectsChange={handleProjectsChange}
       />
       
-      {showNotFound && currentProjects.length === 0 && (
+      {currentProjects.length === 0 && (
         <div className="flex justify-center items-center py-8">
           <NotFound />
         </div>
