@@ -1,39 +1,75 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useSlideStore } from '@/store/useSlideStore'
+import { X } from 'lucide-react'
 
 const GeneratingOverlay = () => {
-    const { isGenerating } = useSlideStore()
+    const { isGenerating, cancelGeneration, isPresentationReady } = useSlideStore()
     const [currentMessageIndex, setCurrentMessageIndex] = useState(0)
+    const [displayedMessages, setDisplayedMessages] = useState<Set<number>>(new Set())
+    const [isInitialGeneration, setIsInitialGeneration] = useState(true)
+    const generationSessionRef = useRef<number>(0)
     
     const messages = [
         "Analyzing content...",
         "Creating layouts...",
         "Applying theme...",
         "Generating slides...",
-        "Finalizing presentation..."
+        "Finalizing presentation...",
+        "Loading your presentation..."
     ]
 
-    // Rotate messages every 2 seconds when generating
+    // Reset everything when generation starts (new session)
+    useEffect(() => {
+        if (isGenerating && isInitialGeneration) {
+            generationSessionRef.current += 1
+            setCurrentMessageIndex(0)
+            setDisplayedMessages(new Set([0])) // Start with first message displayed
+            setIsInitialGeneration(false)
+        } else if (!isGenerating) {
+            // Reset for next session
+            setIsInitialGeneration(true)
+        }
+    }, [isGenerating, isInitialGeneration])
+
+    // Progress through messages without repetition
     useEffect(() => {
         if (!isGenerating) return
         
         const interval = setInterval(() => {
-            setCurrentMessageIndex((prev) => (prev + 1) % messages.length)
-        }, 2000)
+            setCurrentMessageIndex((prevIndex) => {
+                const nextIndex = prevIndex + 1
+                if (nextIndex >= messages.length - 1) {
+                    // Don't go to the last message ("Loading...") during generation
+                    return messages.length - 2 // Stay on "Finalizing presentation..."
+                }
+                
+                setDisplayedMessages(prev => new Set([...prev, nextIndex]))
+                return nextIndex
+            })
+        }, 2500) // Slightly longer intervals for better UX
 
         return () => clearInterval(interval)
     }, [isGenerating, messages.length])
 
-    // Reset message index when generation starts
+    // Show "Loading your presentation..." when generation is done but presentation not ready
     useEffect(() => {
-        if (isGenerating) {
-            setCurrentMessageIndex(0)
+        if (!isGenerating && !isPresentationReady) {
+            setCurrentMessageIndex(messages.length - 1) // "Loading your presentation..."
         }
-    }, [isGenerating])
+    }, [isGenerating, isPresentationReady, messages.length])
 
-    if (!isGenerating) return null
+    // Handle cancel generation
+    const handleCancel = () => {
+        cancelGeneration()
+        // Could add additional cleanup logic here if needed
+    }
+
+    // Show overlay if generating OR if presentation is not ready
+    const shouldShowOverlay = isGenerating || !isPresentationReady
+    
+    if (!shouldShowOverlay) return null
 
     return (
         <div 
@@ -55,10 +91,20 @@ const GeneratingOverlay = () => {
                     <h2 className="text-3xl font-bold text-foreground mb-4 drop-shadow-lg" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
                         Creating your presentation
                     </h2>
-                    <p className="text-xl font-semibold text-foreground drop-shadow-md" style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.7)' }}>
+                    <p className="text-xl font-semibold text-foreground drop-shadow-md mb-8" style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.7)' }}>
                         {messages[currentMessageIndex]}
                         <span className="animate-pulse">...</span>
                     </p>
+                    
+                    {/* Cancel Button */}
+                    <button
+                        onClick={handleCancel}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/50 text-white hover:text-gray-200 rounded-lg font-medium transition-all duration-200 backdrop-blur-sm"
+                        style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}
+                    >
+                        <X size={18} />
+                        Cancel Generation
+                    </button>
                 </div>
             </div>
         </div>

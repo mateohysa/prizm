@@ -20,6 +20,8 @@ const Presentation = ({project}: Props) => {
         setSlides, 
         setProject,
         setCurrentTheme,
+        setIsGenerating,
+        setIsPresentationReady,
     } = useSlideStore()
 
     useEffect(() => {
@@ -32,6 +34,17 @@ const Presentation = ({project}: Props) => {
             setSlides(project.slides as unknown as Slide[])
         }
     },[project, setProject, setSlides, setCurrentTheme])
+
+    // Mark presentation as ready after component mounts and data is loaded
+    useEffect(() => {
+        // Small delay to ensure all child components are rendered
+        const timer = setTimeout(() => {
+            setIsGenerating(false)
+            setIsPresentationReady(true)
+        }, 100)
+
+        return () => clearTimeout(timer)
+    }, [setIsGenerating, setIsPresentationReady])
 
   return (
     <DndProvider backend={HTML5Backend}>
