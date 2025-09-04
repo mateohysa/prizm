@@ -138,6 +138,13 @@ export const ImageAndText = {
     content: [
       {
         id: uuidv4(),
+        type: "heading1" as ContentType,
+        name: "Heading1",
+        content: "",
+        placeholder: "Heading1",
+      },
+      {
+        id: uuidv4(),
         type: "resizable-column" as ContentType,
         name: "Image and text",
         className: "border",
@@ -165,13 +172,6 @@ export const ImageAndText = {
             content: [
               {
                 id: uuidv4(),
-                type: "heading1" as ContentType,
-                name: "Heading1",
-                content: "",
-                placeholder: "Heading1",
-              },
-              {
-                id: uuidv4(),
                 type: "paragraph" as ContentType,
                 name: "Paragraph",
                 content: "",
@@ -179,7 +179,7 @@ export const ImageAndText = {
               },
             ],
             className: "w-full h-full p-8 flex justify-center items-center",
-            placeholder: "Heading1",
+            placeholder: "Paragraph",
           },
         ],
       },
@@ -198,6 +198,13 @@ export const TextAndImage = {
     content: [
       {
         id: uuidv4(),
+        type: "heading1" as ContentType,
+        name: "Heading1",
+        content: "",
+        placeholder: "Heading1",
+      },
+      {
+        id: uuidv4(),
         type: "resizable-column" as ContentType,
         name: "Text and image",
         className: "border",
@@ -209,13 +216,6 @@ export const TextAndImage = {
             content: [
               {
                 id: uuidv4(),
-                type: "heading1" as ContentType,
-                name: "Heading1",
-                content: "",
-                placeholder: "Heading1",
-              },
-              {
-                id: uuidv4(),
                 type: "paragraph" as ContentType,
                 name: "Paragraph",
                 content: "",
@@ -223,7 +223,7 @@ export const TextAndImage = {
               },
             ],
             className: "w-full h-full p-8 flex justify-center items-center",
-            placeholder: "Heading1",
+            placeholder: "Paragraph",
           },
           {
             id: uuidv4(),
