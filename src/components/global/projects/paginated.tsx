@@ -74,7 +74,7 @@ const PaginatedProjects = () => {
             slideData={null}
             themeName={project.themeName || 'default'}
             onOptimisticDelete={handleOptimisticDelete}
-            onOptimisticRecover={() => {}} // Not needed in dashboard view
+            onOptimisticRecover={async () => {}} // Not needed in dashboard view
           />
         ))}
         

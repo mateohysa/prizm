@@ -1,114 +1,324 @@
-import React, { useEffect, useState } from 'react'
-import {motion, AnimatePresence} from 'framer-motion'
+import React, { useEffect, useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useSlideStore } from '@/store/useSlideStore'
 import { MasterRecursiveComponent } from '../editor/MasterRecursiveComponent'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight, X } from 'lucide-react'
-
+import { ChevronLeft, ChevronRight, X, Maximize2, Minimize2, Play, Pause } from 'lucide-react'
 
 type Props = {
     onClose: () => void
 }
 
-const PresentationMode = ({onClose}: Props) => {
-    const {getOrderedSlides, currentTheme} = useSlideStore()
+type TransitionType = 'fade' | 'slide' | 'scale' | 'rotate' | 'flip'
+
+const PresentationMode = ({ onClose }: Props) => {
+    const { getOrderedSlides, currentTheme } = useSlideStore()
     const slides = getOrderedSlides()
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
+    const [isFullscreen, setIsFullscreen] = useState(false)
+    const [showControls, setShowControls] = useState(true)
+    const [isAutoPlaying, setIsAutoPlaying] = useState(false)
+    const [transition, setTransition] = useState<TransitionType>('slide')
+    const [direction, setDirection] = useState(0)
 
+    // Hide scrollbar when presentation mode is active
+    useEffect(() => {
+        // Save original overflow style
+        const originalOverflow = document.body.style.overflow
+        // Hide scrollbar
+        document.body.style.overflow = 'hidden'
+        
+        return () => {
+            // Restore original overflow when component unmounts
+            document.body.style.overflow = originalOverflow
+        }
+    }, [])
+
+    // Auto-hide controls after 3 seconds of inactivity
+    useEffect(() => {
+        let timeout: NodeJS.Timeout
+        const handleMouseMove = () => {
+            setShowControls(true)
+            clearTimeout(timeout)
+            timeout = setTimeout(() => setShowControls(false), 3000)
+        }
+        
+        window.addEventListener('mousemove', handleMouseMove)
+        timeout = setTimeout(() => setShowControls(false), 3000)
+        
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove)
+            clearTimeout(timeout)
+        }
+    }, [])
+
+    // Auto-play functionality
+    useEffect(() => {
+        if (!isAutoPlaying) return
+        
+        const interval = setInterval(() => {
+            setCurrentSlideIndex((prev) => {
+                if (prev === slides.length - 1) {
+                    setIsAutoPlaying(false)
+                    return prev
+                }
+                setDirection(1)
+                return prev + 1
+            })
+        }, 5000) // Change slide every 5 seconds
+        
+        return () => clearInterval(interval)
+    }, [isAutoPlaying, slides.length])
+
+    const goToNextSlide = useCallback(() => {
+        if (currentSlideIndex < slides.length - 1) {
+            setDirection(1)
+            setCurrentSlideIndex(currentSlideIndex + 1)
+        }
+    }, [currentSlideIndex, slides.length])
+
+    const goToPreviousSlide = useCallback(() => {
+        if (currentSlideIndex > 0) {
+            setDirection(-1)
+            setCurrentSlideIndex(currentSlideIndex - 1)
+        }
+    }, [currentSlideIndex])
+
+    const toggleFullscreen = useCallback(() => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen()
+            setIsFullscreen(true)
+        } else {
+            document.exitFullscreen()
+            setIsFullscreen(false)
+        }
+    }, [])
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if(e.key === 'ArrowRight' || e.key === ' '){
-                if(currentSlideIndex === slides.length - 1) {
+            e.preventDefault()
+            
+            switch (e.key) {
+                case 'ArrowRight':
+                case ' ':
+                    goToNextSlide()
+                    break
+                case 'ArrowLeft':
+                    goToPreviousSlide()
+                    break
+                case 'Escape':
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen()
+                    }
                     onClose()
-                } else {
-                    setCurrentSlideIndex(currentSlideIndex + 1)
-                }
-            }else if(e.key === 'ArrowLeft'){
-                if(currentSlideIndex === 0) {
-                    onClose()
-                } else {
-                    setCurrentSlideIndex(currentSlideIndex - 1)
-                }
-            }else if(e.key === 'Escape'){
-                onClose()
+                    break
+                case 'f':
+                case 'F':
+                    toggleFullscreen()
+                    break
+                case 'Home':
+                    setDirection(-1)
+                    setCurrentSlideIndex(0)
+                    break
+                case 'End':
+                    setDirection(1)
+                    setCurrentSlideIndex(slides.length - 1)
+                    break
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                    const transitions: TransitionType[] = ['fade', 'slide', 'scale', 'rotate', 'flip']
+                    setTransition(transitions[parseInt(e.key) - 1])
+                    break
             }
         }
+        
         window.addEventListener('keydown', handleKeyDown)
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [currentSlideIndex, slides.length, goToNextSlide, goToPreviousSlide, onClose, toggleFullscreen])
+
+    // Animation variants for different transition types
+    const getAnimationVariants = (type: TransitionType, direction: number) => {
+        switch (type) {
+            case 'fade':
+                return {
+                    initial: { opacity: 0 },
+                    animate: { opacity: 1 },
+                    exit: { opacity: 0 }
+                }
+            case 'slide':
+                return {
+                    initial: { x: direction > 0 ? 1000 : -1000, opacity: 0 },
+                    animate: { x: 0, opacity: 1 },
+                    exit: { x: direction < 0 ? 1000 : -1000, opacity: 0 }
+                }
+            case 'scale':
+                return {
+                    initial: { scale: 0.8, opacity: 0 },
+                    animate: { scale: 1, opacity: 1 },
+                    exit: { scale: 1.2, opacity: 0 }
+                }
+            case 'rotate':
+                return {
+                    initial: { rotateY: direction > 0 ? 90 : -90, opacity: 0 },
+                    animate: { rotateY: 0, opacity: 1 },
+                    exit: { rotateY: direction < 0 ? 90 : -90, opacity: 0 }
+                }
+            case 'flip':
+                return {
+                    initial: { rotateX: 90, opacity: 0 },
+                    animate: { rotateX: 0, opacity: 1 },
+                    exit: { rotateX: -90, opacity: 0 }
+                }
+            default:
+                return {
+                    initial: { opacity: 0 },
+                    animate: { opacity: 1 },
+                    exit: { opacity: 0 }
+                }
         }
-    },[slides.length, currentSlideIndex, onClose])
+    }
 
+    const currentVariant = getAnimationVariants(transition, direction)
 
-  return (
-    <div className='fixed inset-0 bg-black flex items-center justify-center z-50'>
-        <div
-        className='relative w-full h-full'
-        style={{
-            aspectRatio: '16/9',
-            maxHeight: '100vh',
-            maxWidth: '177.78vh',
-        }}
+    return (
+        <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className='fixed inset-0 bg-black z-[9999]'
         >
-
-            {' '}
-            <AnimatePresence mode='wait'>
-                <motion.div
-                key={currentSlideIndex}
-                initial={{opacity: 0, scale: 0.8}}
-                animate={{opacity: 1, scale: 1}}
-                exit={{opacity: 0, scale: 1.2}}
-                transition={{duration: 0.4}}
-                className={`w-full h-full pointer-events-none ${slides[currentSlideIndex].className}`}
-                style={{
-                    backgroundColor: currentTheme.slideBackgroundColor,
-                    backgroundImage: currentTheme.gradientBackground,
-                    color: currentTheme.accentColor,
-                    fontFamily: currentTheme.fontFamily,
-                }}
-                >
-                    <div className='w-full h-full overflow-hidden'>
-                        {slides[currentSlideIndex] && (
-                            <MasterRecursiveComponent 
-                            content={slides[currentSlideIndex].content} 
-                            onContentChange={() => {}}
-                            slideId={slides[currentSlideIndex].id}
-                            isPreview={false}
-                            isEditable={false}
-                            />
-                        )}
-                    </div>
-                </motion.div>
-            </AnimatePresence>
-            <Button
-            variant='ghost'
-            size='icon'
-            className='absolute top-4 right-4 text-white'
-            onClick={onClose}
-            >
-                <X className='w-4 h-4' />
-            </Button>
-            <div className='absolute bottom-4 left-1/2 -translate-x-1/2 transform flex space-x-4'>
-                <Button
-                variant='outline'
-                size='icon'
-                onClick={() => currentSlideIndex === 0 ? onClose() : setCurrentSlideIndex(currentSlideIndex - 1)}
-                >
-                    <ChevronLeft className='w-4 h-4' />
-                </Button>
-                <Button
-                variant='outline'
-                size='icon'
-                onClick={() => currentSlideIndex === slides.length - 1 ? onClose() : setCurrentSlideIndex(currentSlideIndex + 1)}
-                >
-                    
-                        <ChevronRight className='w-4 h-4' />
-                </Button>
+            {/* Main slide container */}
+            <div className='w-full h-full relative overflow-hidden'>
+                <AnimatePresence mode='wait'>
+                    <motion.div
+                        key={currentSlideIndex}
+                        initial={currentVariant.initial}
+                        animate={currentVariant.animate}
+                        exit={currentVariant.exit}
+                        transition={{
+                            duration: 0.5,
+                            ease: [0.42, 0, 0.58, 1]
+                        }}
+                        className='absolute inset-0 flex items-center justify-center'
+                        style={{
+                            backgroundColor: currentTheme.slideBackgroundColor,
+                            backgroundImage: currentTheme.gradientBackground,
+                            perspective: '1000px'
+                        }}
+                    >
+                        <div className='w-full h-full max-w-7xl mx-auto p-8 flex items-center justify-center'>
+                            <div className='w-full h-full' style={{
+                                maxWidth: '1920px',
+                                maxHeight: '1080px',
+                                aspectRatio: '16 / 9',
+                                color: currentTheme.fontColor,
+                                fontFamily: currentTheme.fontFamily,
+                            }}>
+                                {slides[currentSlideIndex] && (
+                                    <div className={`w-full h-full ${slides[currentSlideIndex]?.className || ''}`}>
+                                        <MasterRecursiveComponent 
+                                            content={slides[currentSlideIndex].content} 
+                                            onContentChange={() => {}}
+                                            slideId={slides[currentSlideIndex].id}
+                                            isPreview={false}
+                                            isEditable={false}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
             </div>
-        </div>
-    </div>
-  )
+
+            {/* Controls overlay */}
+            <motion.div 
+                className='absolute inset-0 pointer-events-none z-10'
+                initial={{ opacity: 1 }}
+                animate={{ opacity: showControls ? 1 : 0 }}
+                transition={{ duration: 0.3 }}
+            >
+                {/* Top bar */}
+                <div className='absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/50 to-transparent pointer-events-auto z-20'>
+                    <div className='flex justify-between items-center'>
+                        <div className='flex items-center space-x-2'>
+                            <span className='text-white/80 text-sm'>
+                                Slide {currentSlideIndex + 1} of {slides.length}
+                            </span>
+                        </div>
+                        <div className='flex items-center space-x-2'>
+                            <Button
+                                variant='ghost'
+                                size='icon'
+                                className='text-white hover:bg-white/20 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0'
+                                onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+                            >
+                                {isAutoPlaying ? <Pause className='w-5 h-5' /> : <Play className='w-5 h-5' />}
+                            </Button>
+                            <Button
+                                variant='ghost'
+                                size='icon'
+                                className='text-white hover:bg-white/20 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0'
+                                onClick={toggleFullscreen}
+                            >
+                                {isFullscreen ? <Minimize2 className='w-5 h-5' /> : <Maximize2 className='w-5 h-5' />}
+                            </Button>
+                            <Button
+                                variant='ghost'
+                                size='icon'
+                                className='text-white hover:bg-white/20 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0'
+                                onClick={onClose}
+                            >
+                                <X className='w-5 h-5' />
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Bottom controls */}
+                <div className='absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/50 to-transparent pointer-events-auto'>
+                    {/* Keyboard shortcuts hint */}
+                    <div className='text-center text-white/60 text-xs'>
+                        <span className='inline-block mx-2'>← → Navigate</span>
+                        <span className='inline-block mx-2'>Space Next</span>
+                        <span className='inline-block mx-2'>F Fullscreen</span>
+                        <span className='inline-block mx-2'>ESC Exit</span>
+                        <span className='inline-block mx-2'>1-5 Transitions</span>
+                    </div>
+                </div>
+            </motion.div>
+
+            {/* Click areas for navigation - positioned to not block controls */}
+            <div 
+                className='absolute inset-0 flex pointer-events-none z-0'
+                style={{ outline: 'none' }}
+            >
+                <div 
+                    className='flex-1 pointer-events-auto cursor-pointer'
+                    onClick={goToPreviousSlide}
+                    aria-label='Previous slide'
+                    style={{ 
+                        outline: 'none',
+                        marginTop: '80px', // Leave space for top controls
+                        marginBottom: '80px' // Leave space for bottom controls
+                    }}
+                />
+                <div 
+                    className='flex-1 pointer-events-auto cursor-pointer'
+                    onClick={goToNextSlide}
+                    aria-label='Next slide'
+                    style={{ 
+                        outline: 'none',
+                        marginTop: '80px', // Leave space for top controls
+                        marginBottom: '80px' // Leave space for bottom controls
+                    }}
+                />
+            </div>
+        </motion.div>
+    )
 }
 
 export default PresentationMode
