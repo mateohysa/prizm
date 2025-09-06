@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSlideStore } from '@/store/useSlideStore'
 import { MasterRecursiveComponent } from '../editor/MasterRecursiveComponent'
@@ -20,6 +20,62 @@ const PresentationMode = ({ onClose }: Props) => {
     const [isAutoPlaying, setIsAutoPlaying] = useState(false)
     const [transition, setTransition] = useState<TransitionType>('slide')
     const [direction, setDirection] = useState(0)
+    const [contentScale, setContentScale] = useState(1)
+    const slideContentRef = useRef<HTMLDivElement>(null)
+    const presentationContainerRef = useRef<HTMLDivElement>(null)
+
+    // Calculate scale for slide content
+    const calculateScale = useCallback(() => {
+        if (!slideContentRef.current || !presentationContainerRef.current) return;
+        
+        // First, reset scale to get true dimensions
+        slideContentRef.current.style.transform = 'scale(1)';
+        
+        // Get the natural size of the slide content
+        const contentWidth = slideContentRef.current.scrollWidth;
+        const contentHeight = slideContentRef.current.scrollHeight;
+        
+        // Get the presentation container dimensions
+        const containerWidth = presentationContainerRef.current.clientWidth;
+        const containerHeight = presentationContainerRef.current.clientHeight;
+        
+        // Calculate scale factors for both dimensions
+        const scaleX = (containerWidth * 0.9) / contentWidth; // 90% to leave some padding
+        const scaleY = (containerHeight * 0.85) / contentHeight; // 85% for height to account for controls
+        
+        // Use the smaller scale to ensure everything fits
+        const scale = Math.min(scaleX, scaleY);
+        
+        console.log('Scale calculation:', {
+            contentWidth,
+            contentHeight,
+            containerWidth,
+            containerHeight,
+            scaleX,
+            scaleY,
+            finalScale: scale
+        });
+        
+        setContentScale(scale);
+    }, []);
+
+    // Recalculate scale when slide changes or window resizes
+    useEffect(() => {
+        // Small delay to ensure content is rendered
+        const timeout = setTimeout(() => {
+            calculateScale();
+        }, 100);
+        
+        const handleResize = () => {
+            calculateScale();
+        };
+        
+        window.addEventListener('resize', handleResize);
+        return () => {
+            clearTimeout(timeout);
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [currentSlideIndex, calculateScale]);
 
     // Hide scrollbar when presentation mode is active
     useEffect(() => {
@@ -209,16 +265,34 @@ const PresentationMode = ({ onClose }: Props) => {
                             perspective: '1000px'
                         }}
                     >
-                        <div className='w-full h-full max-w-7xl mx-auto p-8 flex items-center justify-center'>
-                            <div className='w-full h-full' style={{
-                                maxWidth: '1920px',
-                                maxHeight: '1080px',
-                                aspectRatio: '16 / 9',
-                                color: currentTheme.fontColor,
-                                fontFamily: currentTheme.fontFamily,
-                            }}>
+                        <div 
+                            ref={presentationContainerRef}
+                            className='w-full h-full max-w-7xl mx-auto p-8 flex items-center justify-center'
+                        >
+                            <div 
+                                className='flex items-center justify-center'
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    maxWidth: '1920px',
+                                    maxHeight: '1080px',
+                                    aspectRatio: '16 / 9',
+                                }}
+                            >
                                 {slides[currentSlideIndex] && (
-                                    <div className={`w-full h-full ${slides[currentSlideIndex]?.className || ''}`}>
+                                    <div 
+                                        ref={slideContentRef}
+                                        className={`${slides[currentSlideIndex]?.className || ''}`}
+                                        style={{
+                                            transform: `scale(${contentScale})`,
+                                            transformOrigin: 'center center',
+                                            color: currentTheme.fontColor,
+                                            fontFamily: currentTheme.fontFamily,
+                                            fontSize: '1.8em', // 20% bigger font size
+                                            maxWidth: '900px', // Max width but allow natural sizing
+                                            transition: 'transform 0.3s ease',
+                                        }}
+                                    >
                                         <MasterRecursiveComponent 
                                             content={slides[currentSlideIndex].content} 
                                             onContentChange={() => {}}

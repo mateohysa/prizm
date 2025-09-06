@@ -104,7 +104,19 @@ export const useSlideStore = DISABLE_PERSISTENCE
       project: null,
       slides: [],
       currentSlide: 0,
-      setSlides: (slides: Slide[]) => set({slides}),
+      setSlides: (slides: Slide[]) => {
+          // Ensure all slide IDs are unique
+          const seenIds = new Set<string>();
+          const uniqueSlides = slides.map(slide => {
+              if (seenIds.has(slide.id)) {
+                  // Generate new ID for duplicate
+                  return { ...slide, id: uuidv4() };
+              }
+              seenIds.add(slide.id);
+              return slide;
+          });
+          set({slides: uniqueSlides});
+      },
       setProject: (project) => set({project}),
       setCurrentSlide: (index: number) => set({ currentSlide: index }),
       currentTheme: defaultTheme, 
@@ -209,7 +221,19 @@ export const useSlideStore = DISABLE_PERSISTENCE
             project: null,
             slides: [],
             currentSlide: 0,
-            setSlides: (slides: Slide[]) => set({slides}),
+            setSlides: (slides: Slide[]) => {
+                // Ensure all slide IDs are unique
+                const seenIds = new Set<string>();
+                const uniqueSlides = slides.map(slide => {
+                    if (seenIds.has(slide.id)) {
+                        // Generate new ID for duplicate
+                        return { ...slide, id: uuidv4() };
+                    }
+                    seenIds.add(slide.id);
+                    return slide;
+                });
+                set({slides: uniqueSlides});
+            },
             setProject: (project) => set({project}),
             setCurrentSlide: (index: number) => set({ currentSlide: index }),
             currentTheme: defaultTheme, 

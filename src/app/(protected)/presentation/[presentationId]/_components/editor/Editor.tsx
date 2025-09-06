@@ -290,7 +290,7 @@ const Editor = ({ isEditable }: Props) => {
                         />
                     )}
                     {orderedSlides.map((slide, index) => (
-                        <React.Fragment key={slide.id || index}>
+                        <React.Fragment key={`${slide.id}-${index}`}>
                             <DraggableSlide
                                 slide={slide}
                                 index={index}

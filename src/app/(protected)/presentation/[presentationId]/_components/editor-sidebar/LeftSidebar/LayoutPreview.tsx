@@ -47,7 +47,7 @@ const LayoutPreview = ({ hiddenOnMobile = true }: Props) => {
                 </div>
                 {slides.map((slide,index)=>(
                     <DraggableSlidePreview
-                    key={slide.id || index} 
+                    key={`${slide.id}-${index}`} 
                     slide={slide} 
                     index={index} 
                     moveSlide={moveSlide}

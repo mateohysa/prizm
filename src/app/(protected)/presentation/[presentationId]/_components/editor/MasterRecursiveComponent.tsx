@@ -331,7 +331,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = React.memo((
                     >
                        {children.length > 0 ?
                        children.map((subItem:ContentItem, subIndex:number)=>(
-                        <React.Fragment key={subItem.id || `item-${subIndex}`}>
+                        <React.Fragment key={`${subItem.id}-${subIndex}`}>
                             {!isPreview && !subItem.restrictToDrop && 
                             subIndex==0 && 
                             isEditable && 

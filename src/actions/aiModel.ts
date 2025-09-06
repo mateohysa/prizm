@@ -590,9 +590,10 @@ const existingLayouts = [
 const generateImageUrl = async (prompt: string): Promise<string> => {
   try {
     const improvedPrompt = `    
-    Create a highly realistic, professional image based on the following description. The image should look as if captured in real life, with attention to detail, lighting, and texture.
+    Create a highly realistic, professional image in 3:4 aspect ratio based on the following description. The image should look as if captured in real life, with attention to detail, lighting, and texture.
     Description: ${prompt}
     Important Notes:
+    - CRITICAL: Generate this image in 3:4 aspect ratio (Portrait Fullscreen format). This aspect ratio requirement is MANDATORY and must be followed.
     - The image must be in a photorealistic style and visually compelling.
     - Ensure all text, signs, or visible writing in the image are in English.
     - Pay special attention to lighting, shadows, and textures to make the image as lifelike as possible.
@@ -600,6 +601,7 @@ const generateImageUrl = async (prompt: string): Promise<string> => {
     presentations.
     - Focus on accurately depicting the concept described, including specific objects, environment, mood, and context. Maintain
     relevance to the description provided.
+    - ASPECT RATIO: 3:4 (Portrait Fullscreen) - This is required for all generated images.
       Example Use Cases : Business presentations, educational slides, professional designs.
     `;
     
@@ -820,13 +822,14 @@ export const getGenerateLayoutsJSON = async (outlineArray: string[]) => {
 
     Use these outlines: ${JSON.stringify(outlineArray)}
 
-    RULES:
+    CRITICAL RULES:
     1. Write layouts based on the specific outline provided
     2. Each layout must be unique
-    3. STRICTLY follow the structure examples provided
+    3. STRICTLY follow the structure examples provided for each layout type
     4. Fill placeholder data into content fields
-    5. Generate unique image placeholders and alt text
-    6. For images in textAndImage slides: DO NOT add "p-3" or padding classes - images should fill their entire half
+    5. ONLY generate images for layouts that require them: "textAndImage", "imageAndText", "accentLeft", "accentRight"
+    6. DO NOT add images to "twoColumns" and "twoColumnsWithHeadings" - these are TEXT-ONLY layouts
+    7. For images in image-containing slides: DO NOT add "p-3" or padding classes - images should fill their entire half
 
     Example textAndImage structure (FOLLOW EXACTLY):
     ${JSON.stringify({
@@ -888,7 +891,123 @@ export const getGenerateLayoutsJSON = async (outlineArray: string[]) => {
         },
     })}
 
-    For Images:
+    Example twoColumns structure (TEXT-ONLY, NO IMAGES):
+    ${JSON.stringify({
+        id: uuidv4(),
+        slideName: "Two columns",
+        type: "twoColumns",
+        className: "p-4 mx-auto flex justify-center items-center",
+        content: {
+          id: uuidv4(),
+          type: "column",
+          name: "Column",
+          content: [
+            {
+              id: uuidv4(),
+              type: "title",
+              name: "Title",
+              content: "",
+              placeholder: "Untitled Card",
+            },
+            {
+              id: uuidv4(),
+              type: "resizable-column",
+              name: "Two columns",
+              className: "border",
+              content: [
+                {
+                  id: uuidv4(),
+                  type: "paragraph",
+                  name: "Paragraph",
+                  content: "",
+                  placeholder: "Start typing...",
+                },
+                {
+                  id: uuidv4(),
+                  type: "paragraph",
+                  name: "Paragraph",
+                  content: "",
+                  placeholder: "Start typing...",
+                },
+              ],
+            },
+          ],
+        },
+    })}
+
+    Example twoColumnsWithHeadings structure (TEXT-ONLY, NO IMAGES):
+    ${JSON.stringify({
+        id: uuidv4(),
+        slideName: "Two columns with headings",
+        type: "twoColumnsWithHeadings",
+        className: "p-4 mx-auto flex justify-center items-center",
+        content: {
+          id: uuidv4(),
+          type: "column",
+          name: "Column",
+          content: [
+            {
+              id: uuidv4(),
+              type: "title",
+              name: "Title",
+              content: "",
+              placeholder: "Untitled Card",
+            },
+            {
+              id: uuidv4(),
+              type: "resizable-column",
+              name: "Two columns with headings",
+              className: "border",
+              content: [
+                {
+                  id: uuidv4(),
+                  type: "column",
+                  name: "Column",
+                  content: [
+                    {
+                      id: uuidv4(),
+                      type: "heading3",
+                      name: "Heading3",
+                      content: "",
+                      placeholder: "Heading 3",
+                    },
+                    {
+                      id: uuidv4(),
+                      type: "paragraph",
+                      name: "Paragraph",
+                      content: "",
+                      placeholder: "Start typing...",
+                    },
+                  ],
+                },
+                {
+                  id: uuidv4(),
+                  type: "column",
+                  name: "Column",
+                  content: [
+                    {
+                      id: uuidv4(),
+                      type: "heading3",
+                      name: "Heading3",
+                      content: "",
+                      placeholder: "Heading 3",
+                    },
+                    {
+                      id: uuidv4(),
+                      type: "paragraph",
+                      name: "Paragraph",
+                      content: "",
+                      placeholder: "Start typing...",
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+    })}
+
+    For Images (ONLY for textAndImage, imageAndText, accentLeft, accentRight):
     - Alt text should describe the image clearly and concisely
     - Focus on main subjects, colors, shapes, people, or objects
     - Align with presentation context (professional, educational, business)
