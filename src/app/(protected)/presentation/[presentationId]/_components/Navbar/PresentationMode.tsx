@@ -21,60 +21,72 @@ const PresentationMode = ({ onClose }: Props) => {
     const [transition, setTransition] = useState<TransitionType>('slide')
     const [direction, setDirection] = useState(0)
     const [contentScale, setContentScale] = useState(1)
+    // Typography multiplier for presentation only
+    const PRESENTATION_FONT_SCALE = 1.7
     const slideContentRef = useRef<HTMLDivElement>(null)
     const presentationContainerRef = useRef<HTMLDivElement>(null)
+    const frameRef = useRef<HTMLDivElement>(null)
+
+    // Fixed slide frame dimensions (design size)
+    const FRAME_WIDTH = 1600
+    const FRAME_HEIGHT = 900
 
     // Calculate scale for slide content
     const calculateScale = useCallback(() => {
-        if (!slideContentRef.current || !presentationContainerRef.current) return;
-        
-        // First, reset scale to get true dimensions
-        slideContentRef.current.style.transform = 'scale(1)';
-        
-        // Get the natural size of the slide content
-        const contentWidth = slideContentRef.current.scrollWidth;
-        const contentHeight = slideContentRef.current.scrollHeight;
-        
+        if (!presentationContainerRef.current) return
         // Get the presentation container dimensions
-        const containerWidth = presentationContainerRef.current.clientWidth;
-        const containerHeight = presentationContainerRef.current.clientHeight;
-        
-        // Calculate scale factors for both dimensions
-        const scaleX = (containerWidth * 0.9) / contentWidth; // 90% to leave some padding
-        const scaleY = (containerHeight * 0.85) / contentHeight; // 85% for height to account for controls
-        
-        // Use the smaller scale to ensure everything fits
-        const scale = Math.min(scaleX, scaleY);
-        
-        console.log('Scale calculation:', {
-            contentWidth,
-            contentHeight,
-            containerWidth,
-            containerHeight,
-            scaleX,
-            scaleY,
-            finalScale: scale
-        });
-        
-        setContentScale(scale);
+        const containerWidth = presentationContainerRef.current.clientWidth
+        const containerHeight = presentationContainerRef.current.clientHeight
+
+        // Leave a small safe area for controls/padding
+        const usableWidth = containerWidth * 0.95
+        const usableHeight = containerHeight * 0.9
+
+        // Calculate scale to fit the fixed 16:9 frame
+        const scaleX = usableWidth / FRAME_WIDTH
+        const scaleY = usableHeight / FRAME_HEIGHT
+        const scale = Math.min(scaleX, scaleY)
+        setContentScale(scale)
     }, []);
 
     // Recalculate scale when slide changes or window resizes
     useEffect(() => {
+        let timeout: NodeJS.Timeout
+
+        const measure = async () => {
+            // Wait for fonts if available to reduce layout shifts
+            try {
+                // @ts-ignore - fonts may not exist in all browsers
+                if (document.fonts && document.fonts.ready) {
+                    // @ts-ignore
+                    await document.fonts.ready
+                }
+            } catch {}
+            calculateScale()
+        }
+
         // Small delay to ensure content is rendered
-        const timeout = setTimeout(() => {
-            calculateScale();
-        }, 100);
-        
+        timeout = setTimeout(() => {
+            void measure()
+        }, 100)
+
         const handleResize = () => {
-            calculateScale();
-        };
-        
-        window.addEventListener('resize', handleResize);
+            calculateScale()
+        }
+        window.addEventListener('resize', handleResize)
+
+        // Observe container size changes for robust recalculation
+        let ro: ResizeObserver | null = null
+        if (presentationContainerRef.current && typeof ResizeObserver !== 'undefined') {
+            ro = new ResizeObserver(() => calculateScale())
+            ro.observe(presentationContainerRef.current)
+        }
+
         return () => {
-            clearTimeout(timeout);
-            window.removeEventListener('resize', handleResize);
-        };
+            if (timeout) clearTimeout(timeout)
+            window.removeEventListener('resize', handleResize)
+            if (ro) ro.disconnect()
+        }
     }, [currentSlideIndex, calculateScale]);
 
     // Hide scrollbar when presentation mode is active
@@ -269,28 +281,30 @@ const PresentationMode = ({ onClose }: Props) => {
                             ref={presentationContainerRef}
                             className='w-full h-full max-w-7xl mx-auto p-8 flex items-center justify-center'
                         >
-                            <div 
-                                className='flex items-center justify-center'
+                            {/* Fixed-size slide frame scaled to fit container */}
+                            <div
+                                ref={frameRef}
+                                className='relative overflow-hidden'
                                 style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    maxWidth: '1920px',
-                                    maxHeight: '1080px',
-                                    aspectRatio: '16 / 9',
+                                    width: `${FRAME_WIDTH}px`,
+                                    height: `${FRAME_HEIGHT}px`,
+                                    transform: `scale(${contentScale})`,
+                                    transformOrigin: 'center center',
+                                    transition: 'transform 0.3s ease',
                                 }}
                             >
                                 {slides[currentSlideIndex] && (
-                                    <div 
+                                    <div
                                         ref={slideContentRef}
-                                        className={`${slides[currentSlideIndex]?.className || ''}`}
+                                        className={`${slides[currentSlideIndex]?.className || ''} w-full h-full`}
                                         style={{
-                                            transform: `scale(${contentScale})`,
-                                            transformOrigin: 'center center',
                                             color: currentTheme.fontColor,
                                             fontFamily: currentTheme.fontFamily,
-                                            fontSize: '1.8em', // 20% bigger font size
-                                            maxWidth: '900px', // Max width but allow natural sizing
-                                            transition: 'transform 0.3s ease',
+                                            pointerEvents: 'none',
+                                            userSelect: 'none',
+                                            boxSizing: 'border-box',
+                                            // Provide a CSS variable to scale typography in presentation
+                                            ['--presentation-scale' as any]: String(PRESENTATION_FONT_SCALE),
                                         }}
                                     >
                                         <MasterRecursiveComponent 

@@ -48,7 +48,12 @@ const ColumnComponent = ({
   return (
     <div className='relative w-full h-full'>
         <ResizablePanelGroup direction='horizontal' 
-        className={cn('w-full h-full flex', !isEditable && '!border-0', className)}
+        className={cn(
+            'w-full h-full flex',
+            // In presentation (non-editable), hide borders and add a persistent gutter
+            !isEditable && '!border-0 gap-8',
+            className
+        )}
         >
             {columns.map((item,index)=>(
                 <React.Fragment key={item.id}>
