@@ -19,7 +19,7 @@ type Props = {
 
 const ThemePicker = ({selectedTheme, themes, onThemeSelect}: Props) => {
     const router = useRouter()
-    const {project, setSlides, currentTheme, isGenerating, setIsGenerating} = useSlideStore()
+    const {project, setSlides, currentTheme, isGenerating, setIsGenerating, setIsPresentationReady} = useSlideStore()
     const params = useParams()
     
     const handleGenerateLayouts = async () => {
@@ -42,13 +42,18 @@ const ThemePicker = ({selectedTheme, themes, onThemeSelect}: Props) => {
             if(res.status === 200) {
                 setSlides(res.data as unknown as Slide[])
                 toast.success("Success!" , {description: "Layouts generated successfully"})
+                
+                // Mark presentation as not ready during navigation
+                setIsPresentationReady(false)
+                
                 router.push(`/presentation/${project?.id}`)
+                // Don't set isGenerating(false) here - let the presentation editor do it when ready
             } else {
                 toast.error("Error!" , {description: "Failed to generate layouts"})
+                setIsGenerating(false)
             }
         }catch(error){
             toast.error("Error!" , {description: "Failed to generate layouts"})
-        }finally{
             setIsGenerating(false)
         }
 

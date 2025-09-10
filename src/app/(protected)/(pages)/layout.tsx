@@ -1,5 +1,5 @@
 import React from 'react'
-import { onAuthenticateUser } from "@/actions/user"
+import { getCachedAuthenticatedUser } from "@/actions/user"
 import { redirect } from 'next/navigation'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import AppSidebar from '@/components/global/App-Sidebar'
@@ -13,10 +13,13 @@ type Props = {
 }
 
 const Layout = async ({children}: Props) => {
-    const recentProjects = await getRecentProjects()
-    const checkUser = await onAuthenticateUser()    
+    // Use cached authentication to avoid redundant DB calls
+    const checkUser = await getCachedAuthenticatedUser()    
     
     if(!checkUser.user) redirect("/sign-in")
+    
+    // Pass the authenticated user to avoid re-authentication in getRecentProjects
+    const recentProjects = await getRecentProjects(checkUser)
     return (
     <SidebarProvider className="w-full min-h-screen bg-transparent">
       <AppSidebar

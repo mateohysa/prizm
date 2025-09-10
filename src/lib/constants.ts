@@ -118,6 +118,47 @@ export const itemVariants = {
   },
 };
 
+// Optimized variants for better performance
+export const optimizedContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05, // Reduced from 0.1 for snappier feel
+      delayChildren: 0.1, // Small initial delay
+    },
+  },
+};
+
+export const optimizedItemVariants = {
+  hidden: { 
+    opacity: 0,
+    y: 10, // Reduced from 20 for subtler effect
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 60, // Reduced from 100 for smoother animation
+      damping: 12, // Added damping for less bouncy effect
+      mass: 0.5, // Lighter mass for quicker response
+    },
+  },
+};
+
+// Super lightweight variants for reduced motion preference
+export const reducedMotionVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      duration: 0.2,
+      ease: "easeOut",
+    },
+  },
+};
+
 export const timeAgo = (timestamp: string) => {
   const now = new Date();
   const diffInSeconds = Math.floor(

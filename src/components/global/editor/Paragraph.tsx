@@ -8,7 +8,7 @@ interface ParagraphProps extends React.TextareaHTMLAttributes<HTMLTextAreaElemen
 
 }
 
-const Paragraph = React.forwardRef<HTMLTextAreaElement, ParagraphProps>(({
+const Paragraph = React.forwardRef<HTMLTextAreaElement, ParagraphProps>(({ 
     className,
     styles,
     isPreview = false,
@@ -45,7 +45,9 @@ const Paragraph = React.forwardRef<HTMLTextAreaElement, ParagraphProps>(({
             boxSizing: 'content-box',
             lineHeight: '1.5em',
             minHeight: '1.5em',
-            ...styles
+            // Default paragraph ~18px (text-lg). Allow presentation scaling via CSS var.
+            fontSize: `calc(18px * var(--presentation-scale, 1))`,
+            ...styles,
         }}
         ref={(el)=>{
             (textareaRef.current as HTMLTextAreaElement | null) = el

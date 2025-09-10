@@ -23,9 +23,10 @@ const Navbar = ({presentationId, presentationTitle}: Props) => {
     }
 
   return (
-    <nav
-    className='fixed top-0 left-0 right-0 z-50 w-full h-20 flex justify-between items-center py-4 px-7 border-b border-white/20 dark:border-white/10 bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-sm backdrop-saturate-100 backdrop-contrast-100 duration-300 ease-in-out'
-    >
+    <>
+      <nav
+        className='fixed top-0 left-0 right-0 z-50 w-full h-20 flex justify-between items-center py-4 px-7 border-b border-white/20 dark:border-white/10 bg-white/40 dark:bg-white/5 bg-clip-padding backdrop-blur-sm backdrop-saturate-100 backdrop-contrast-100 duration-300 ease-in-out'
+      >
         {/* Left section */}
         <div className='flex items-center gap-2'>
             {/* Mobile: slide drawer trigger */}
@@ -78,11 +79,15 @@ const Navbar = ({presentationId, presentationTitle}: Props) => {
                 <span className='hidden sm:inline'>Present</span>
             </Button>
         </div>
-
-        {isPresentationMode && <PresentationMode
-        onClose={() => setIsPresentationMode(false)}
-        />}
-    </nav>
+      </nav>
+      
+      {/* Render PresentationMode outside of nav to avoid height constraints */}
+      {isPresentationMode && (
+        <PresentationMode
+          onClose={() => setIsPresentationMode(false)}
+        />
+      )}
+    </>
   )
 }
 

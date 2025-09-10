@@ -1,47 +1,68 @@
 'use client'
 import React, { useState } from 'react'
-import { Project } from '@/generated/prisma'
 import AlertDialogBox from '@/components/global/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Trash } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { deleteAllProjects } from '@/actions/project'
-
-
-
+import { DeletedProjectListItem } from '@/lib/types/project'
 
 type Props = {
-    projects: Project[]
+    projects: DeletedProjectListItem[]
+    onDeleteAll?: () => void // Callback to clear projects optimistically
+    disabled?: boolean
 }
 
-const DeleteAllButton = ({projects}: Props) => {
+const DeleteAllButton = ({projects, onDeleteAll, disabled}: Props) => {
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false)
-    const router = useRouter()
 
     const handleDeleteAllProjects = async () => {
-        setLoading(true)
+        console.log('🗑️ DeleteAllButton handleDeleteAllProjects called')
+        
         if(projects.length === 0 || !projects) {
-            setLoading(false)
-            setOpen(false)
             toast.error("Error", {description:'No projects to delete'})
+            setOpen(false)
             return
         }
-        try {
-            const res = await deleteAllProjects(projects.map((project) => project.id))
-            if(res.status !== 200){
+        
+        setLoading(true)
+        setOpen(false)
+        
+        // Use the parent's delete handler if provided, otherwise use internal logic
+        if (onDeleteAll) {
+            console.log('🗑️ Using parent onDeleteAll callback')
+            try {
+                await onDeleteAll()
+            } catch (error) {
+                console.error('Error in onDeleteAll:', error)
+            } finally {
                 setLoading(false)
-                toast.error("Error", {description: res.error})
-                return
             }
-            router.refresh()
-            setOpen(false)
-        } catch (error) {
-            console.error(error)
-            toast.error("Error", {description: "Unable to delete projects."})
-        }
+        } else {
+            console.log('🗑️ Using internal delete logic')
+            try {
+                const res = await fetch('/api/projects/delete-all', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        projectIds: projects.map((project) => project.id) 
+                    })
+                })
 
+                if (!res.ok) {
+                    throw new Error('Failed to delete all projects')
+                }
+                
+                toast.success("Success!", { 
+                    description: `${projects.length} projects deleted permanently.` 
+                })
+            } catch (error) {
+                console.error(error)
+                toast.error("Error", {description: "Unable to delete projects."})
+            } finally {
+                setLoading(false)
+            }
+        }
     }
   return (
     <AlertDialogBox
@@ -49,10 +70,13 @@ const DeleteAllButton = ({projects}: Props) => {
     className='bg-red-500 text-white dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700'
     onClick={handleDeleteAllProjects}
     loading={loading}
-    // handleOpen={setOpen(!open)}
+    handleOpen={() => setOpen(!open)}
     open={open}
     >
-        <Button className='bg-background-80 rounded-lg dark:hover:bg-background-90 text-primary font-semibold hover:text-white'>
+        <Button 
+            disabled={disabled || loading}
+            className='bg-background-80 rounded-lg dark:hover:bg-background-90 text-primary font-semibold hover:text-white'
+        >
             <Trash />
             Delete All
         </Button>

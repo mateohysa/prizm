@@ -1,7 +1,6 @@
-import { Prisma } from "@prisma/client";
-import type { Prisma as PrismaNamespace } from '@prisma/client';
+import type { Prisma } from "@/generated/prisma";
 
-export type PrismaUser = PrismaNamespace.UserGetPayload<{
+export type PrismaUser = Prisma.UserGetPayload<{
   include:{PurchasedProjects: true}
 }>;
 export interface OutlineCard {

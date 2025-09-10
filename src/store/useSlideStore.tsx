@@ -30,6 +30,9 @@ interface SlideState {
     ) => void
     isGenerating: boolean;
     setIsGenerating: (isGenerating: boolean) => void;
+    cancelGeneration: () => void;
+    isPresentationReady: boolean;
+    setIsPresentationReady: (isReady: boolean) => void;
 }
 
 // Simplified storage with quota error handling
@@ -101,13 +104,28 @@ export const useSlideStore = DISABLE_PERSISTENCE
       project: null,
       slides: [],
       currentSlide: 0,
-      setSlides: (slides: Slide[]) => set({slides}),
+      setSlides: (slides: Slide[]) => {
+          // Ensure all slide IDs are unique
+          const seenIds = new Set<string>();
+          const uniqueSlides = slides.map(slide => {
+              if (seenIds.has(slide.id)) {
+                  // Generate new ID for duplicate
+                  return { ...slide, id: uuidv4() };
+              }
+              seenIds.add(slide.id);
+              return slide;
+          });
+          set({slides: uniqueSlides});
+      },
       setProject: (project) => set({project}),
       setCurrentSlide: (index: number) => set({ currentSlide: index }),
       currentTheme: defaultTheme, 
       setCurrentTheme: (theme: Theme) => set({currentTheme: theme}),
       isGenerating: false,
       setIsGenerating: (isGenerating: boolean) => set({ isGenerating }),
+      cancelGeneration: () => set({ isGenerating: false }),
+      isPresentationReady: true,
+      setIsPresentationReady: (isReady: boolean) => set({ isPresentationReady: isReady }),
       getOrderedSlides: () => {
           const state = get()
           return [...state.slides].sort((a, b) => a.slideOrder - b.slideOrder)
@@ -203,13 +221,28 @@ export const useSlideStore = DISABLE_PERSISTENCE
             project: null,
             slides: [],
             currentSlide: 0,
-            setSlides: (slides: Slide[]) => set({slides}),
+            setSlides: (slides: Slide[]) => {
+                // Ensure all slide IDs are unique
+                const seenIds = new Set<string>();
+                const uniqueSlides = slides.map(slide => {
+                    if (seenIds.has(slide.id)) {
+                        // Generate new ID for duplicate
+                        return { ...slide, id: uuidv4() };
+                    }
+                    seenIds.add(slide.id);
+                    return slide;
+                });
+                set({slides: uniqueSlides});
+            },
             setProject: (project) => set({project}),
             setCurrentSlide: (index: number) => set({ currentSlide: index }),
             currentTheme: defaultTheme, 
             setCurrentTheme: (theme: Theme) => set({currentTheme: theme}),
             isGenerating: false,
             setIsGenerating: (isGenerating: boolean) => set({ isGenerating }),
+            cancelGeneration: () => set({ isGenerating: false }),
+            isPresentationReady: true,
+            setIsPresentationReady: (isReady: boolean) => set({ isPresentationReady: isReady }),
             getOrderedSlides: () => {
                 const state = get()
                 return [...state.slides].sort((a, b) => a.slideOrder - b.slideOrder)

@@ -12,6 +12,116 @@ import { Images } from "lucide-react"
 // WILL PROBABLY NEED TO MAKE THIS MULTI TURN CHAT
 
 /**
+ * Extract text content from slide structure
+ * Recursively traverses the slide content to find all text-based content
+ */
+const extractTextFromContent = (content: any): string[] => {
+  const textParts: string[] = []
+  
+  if (!content) return textParts
+  
+  // If content has a 'content' property that's a string, extract it
+  if (typeof content.content === 'string' && content.content.trim()) {
+    textParts.push(content.content.trim())
+  }
+  
+  // If content has a placeholder that's a string, extract it
+  if (typeof content.placeholder === 'string' && content.placeholder.trim() && content.placeholder !== 'start typing here') {
+    textParts.push(content.placeholder.trim())
+  }
+  
+  // If content has an array of children, recurse
+  if (Array.isArray(content.content)) {
+    content.content.forEach((child: any) => {
+      textParts.push(...extractTextFromContent(child))
+    })
+  }
+  
+  // If content itself is an array, recurse
+  if (Array.isArray(content)) {
+    content.forEach((child: any) => {
+      textParts.push(...extractTextFromContent(child))
+    })
+  }
+  
+  // If content has nested content object, recurse
+  if (content.content && typeof content.content === 'object' && !Array.isArray(content.content)) {
+    textParts.push(...extractTextFromContent(content.content))
+  }
+  
+  return textParts
+}
+
+/**
+ * Generate a concise project title using Gemini
+ * Uses the original user prompt and first slide content for context
+ */
+export const generateProjectTitle = async (userPrompt: string, firstSlide: Slide | null): Promise<{status: number, title?: string, error?: string}> => {
+  try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "")
+    
+    // Extract text content from first slide
+    let slideText = ''
+    if (firstSlide) {
+      const textParts = extractTextFromContent(firstSlide.content)
+      slideText = textParts.join(' ').slice(0, 500) // Limit context length
+    }
+    
+    const titlePrompt = `
+You are a helpful AI assistant that creates concise, professional titles for presentations.
+
+Original user prompt: "${userPrompt}"
+First slide content: "${slideText}"
+
+Based on the user's prompt and the content of their first slide, generate a professional, descriptive title for their presentation.
+
+IMPORTANT REQUIREMENTS:
+- Title must be 3-5 words maximum (in rare cases 6 words is acceptable)
+- Title should be professional and suitable for business/educational presentations
+- Title should capture the main topic or theme
+- Do NOT include quotation marks or special characters
+- Keep it concise and impactful
+
+Examples of good titles:
+- "Marketing Strategy Overview"
+- "Digital Transformation Guide"
+- "Budget Planning 2024"
+- "Team Performance Metrics"
+- "Product Launch Strategy"
+
+Return ONLY the title text, nothing else.`
+    
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
+    const result = await model.generateContent(titlePrompt)
+    const response = result.response
+    
+    if (response) {
+      let title = response.text().trim()
+      
+      // Clean up the response
+      title = title.replace(/^["']|["']$/g, '') // Remove quotes
+      title = title.replace(/\n[\s\S]*/g, '') // Remove everything after first line
+      title = title.trim()
+      
+      // Validate title length (word count)
+      const wordCount = title.split(' ').filter(word => word.length > 0).length
+      
+      if (title && wordCount >= 1 && wordCount <= 6) {
+        return { status: 200, title }
+      } else {
+        console.warn(`Generated title has ${wordCount} words: "${title}"`, 'Using fallback.')
+        return { status: 400, error: 'Generated title length invalid' }
+      }
+    }
+    
+    return { status: 400, error: 'No response from Gemini API' }
+  } catch (error) {
+    console.error('Error generating project title:', error)
+    return { status: 500, error: 'Failed to generate title' }
+  }
+}
+
+/**
  * Generate AI outlines
  * 1. Initialize GoogleGenerativeAI with API key
  * 2. Build prompt instructing outline creation
@@ -470,12 +580,20 @@ const existingLayouts = [
     },
   ];
 
+/**
+ * Generate image URL using Gemini 2.0 Flash image generation
+ * 1. Build photorealistic prompt for professional presentation images
+ * 2. Make POST request to Gemini image generation API
+ * 3. Parse response for base64 image data
+ * 4. Return data URL or fallback to default Unsplash image on error
+ */
 const generateImageUrl = async (prompt: string): Promise<string> => {
   try {
     const improvedPrompt = `    
-    Create a highly realistic, professional image based on the following description. The image should look as if captured in real life, with attention to detail, lighting, and texture.
+    Create a highly realistic, professional image in 3:4 aspect ratio based on the following description. The image should look as if captured in real life, with attention to detail, lighting, and texture.
     Description: ${prompt}
     Important Notes:
+    - CRITICAL: Generate this image in 3:4 aspect ratio (Portrait Fullscreen format). This aspect ratio requirement is MANDATORY and must be followed.
     - The image must be in a photorealistic style and visually compelling.
     - Ensure all text, signs, or visible writing in the image are in English.
     - Pay special attention to lighting, shadows, and textures to make the image as lifelike as possible.
@@ -483,6 +601,7 @@ const generateImageUrl = async (prompt: string): Promise<string> => {
     presentations.
     - Focus on accurately depicting the concept described, including specific objects, environment, mood, and context. Maintain
     relevance to the description provided.
+    - ASPECT RATIO: 3:4 (Portrait Fullscreen) - This is required for all generated images.
       Example Use Cases : Business presentations, educational slides, professional designs.
     `;
     
@@ -703,13 +822,14 @@ export const getGenerateLayoutsJSON = async (outlineArray: string[]) => {
 
     Use these outlines: ${JSON.stringify(outlineArray)}
 
-    RULES:
+    CRITICAL RULES:
     1. Write layouts based on the specific outline provided
     2. Each layout must be unique
-    3. STRICTLY follow the structure examples provided
+    3. STRICTLY follow the structure examples provided for each layout type
     4. Fill placeholder data into content fields
-    5. Generate unique image placeholders and alt text
-    6. For images in textAndImage slides: DO NOT add "p-3" or padding classes - images should fill their entire half
+    5. ONLY generate images for layouts that require them: "textAndImage", "imageAndText", "accentLeft", "accentRight"
+    6. DO NOT add images to "twoColumns" and "twoColumnsWithHeadings" - these are TEXT-ONLY layouts
+    7. For images in image-containing slides: DO NOT add "p-3" or padding classes - images should fill their entire half
 
     Example textAndImage structure (FOLLOW EXACTLY):
     ${JSON.stringify({
@@ -771,7 +891,123 @@ export const getGenerateLayoutsJSON = async (outlineArray: string[]) => {
         },
     })}
 
-    For Images:
+    Example twoColumns structure (TEXT-ONLY, NO IMAGES):
+    ${JSON.stringify({
+        id: uuidv4(),
+        slideName: "Two columns",
+        type: "twoColumns",
+        className: "p-4 mx-auto flex justify-center items-center",
+        content: {
+          id: uuidv4(),
+          type: "column",
+          name: "Column",
+          content: [
+            {
+              id: uuidv4(),
+              type: "title",
+              name: "Title",
+              content: "",
+              placeholder: "Untitled Card",
+            },
+            {
+              id: uuidv4(),
+              type: "resizable-column",
+              name: "Two columns",
+              className: "border",
+              content: [
+                {
+                  id: uuidv4(),
+                  type: "paragraph",
+                  name: "Paragraph",
+                  content: "",
+                  placeholder: "Start typing...",
+                },
+                {
+                  id: uuidv4(),
+                  type: "paragraph",
+                  name: "Paragraph",
+                  content: "",
+                  placeholder: "Start typing...",
+                },
+              ],
+            },
+          ],
+        },
+    })}
+
+    Example twoColumnsWithHeadings structure (TEXT-ONLY, NO IMAGES):
+    ${JSON.stringify({
+        id: uuidv4(),
+        slideName: "Two columns with headings",
+        type: "twoColumnsWithHeadings",
+        className: "p-4 mx-auto flex justify-center items-center",
+        content: {
+          id: uuidv4(),
+          type: "column",
+          name: "Column",
+          content: [
+            {
+              id: uuidv4(),
+              type: "title",
+              name: "Title",
+              content: "",
+              placeholder: "Untitled Card",
+            },
+            {
+              id: uuidv4(),
+              type: "resizable-column",
+              name: "Two columns with headings",
+              className: "border",
+              content: [
+                {
+                  id: uuidv4(),
+                  type: "column",
+                  name: "Column",
+                  content: [
+                    {
+                      id: uuidv4(),
+                      type: "heading3",
+                      name: "Heading3",
+                      content: "",
+                      placeholder: "Heading 3",
+                    },
+                    {
+                      id: uuidv4(),
+                      type: "paragraph",
+                      name: "Paragraph",
+                      content: "",
+                      placeholder: "Start typing...",
+                    },
+                  ],
+                },
+                {
+                  id: uuidv4(),
+                  type: "column",
+                  name: "Column",
+                  content: [
+                    {
+                      id: uuidv4(),
+                      type: "heading3",
+                      name: "Heading3",
+                      content: "",
+                      placeholder: "Heading 3",
+                    },
+                    {
+                      id: uuidv4(),
+                      type: "paragraph",
+                      name: "Paragraph",
+                      content: "",
+                      placeholder: "Start typing...",
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+    })}
+
+    For Images (ONLY for textAndImage, imageAndText, accentLeft, accentRight):
     - Alt text should describe the image clearly and concisely
     - Focus on main subjects, colors, shapes, people, or objects
     - Align with presentation context (professional, educational, business)
@@ -894,14 +1130,38 @@ export const generateLayouts = async (projectId: string, theme: string) => {
 
         console.log("🎉 Slide processing complete!")
 
+        // 🆕 Generate project title after slides are processed
+        console.log("🎯 Generating project title...")
+        let generatedTitle = project.title // Fallback to current title
+        
+        try {
+            // Create context from project outlines since we don't have original prompt
+            const outlinesContext = project.outlines.join('. ')
+            const titleResult = await generateProjectTitle(outlinesContext, processedSlides[0] || null)
+            if (titleResult.status === 200 && titleResult.title) {
+                generatedTitle = titleResult.title
+                console.log(`✅ Generated title: "${generatedTitle}"`)
+            } else {
+                console.warn(`⚠️ Title generation failed, using current title: "${generatedTitle}"`)
+            }
+        } catch (error) {
+            console.error("❌ Error generating title:", error)
+            console.log(`🔄 Falling back to current title: "${generatedTitle}"`)
+        }
+
+        // Update project with slides, theme, and generated title
         await client.project.update({
             where: {
                 id: projectId
             },
             data: {
-                slides: processedSlides, themeName: theme
+                slides: processedSlides, 
+                themeName: theme,
+                title: generatedTitle // Save the generated title
             }
         })
+        
+        console.log(`📝 Project updated with title: "${generatedTitle}"`)
         return {status: 200, data: processedSlides}
     }catch(error){
         console.error("❌ ERROR:", error)

@@ -1,14 +1,14 @@
 import React, { Suspense } from 'react'
 import CreatePageSkeleton from './_components/CreatePage/CreatePageSkeleton'
 import RenderPage from './_components/RenderPage'
-import { onAuthenticateUser } from '@/actions/user'
+import { getCachedAuthenticatedUser } from '@/actions/user'
 import { redirect } from 'next/navigation'
 type Props = {}
 
 const Page = async (props: Props) => {
 
-  // ROUTE PROTECTION
-  const checkUser = await onAuthenticateUser()
+  // ROUTE PROTECTION - using cached authentication
+  const checkUser = await getCachedAuthenticatedUser()
   if(!checkUser){
     redirect('/sign-in')
   }

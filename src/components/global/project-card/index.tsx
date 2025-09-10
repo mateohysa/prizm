@@ -2,103 +2,141 @@
 import React, { useState } from 'react'
 import { JsonValue } from '@prisma/client/runtime/library'
 import { motion } from 'framer-motion'
-import { itemVariants, themes, timeAgo } from '@/lib/constants'
+import { optimizedItemVariants, timeAgo } from '@/lib/constants'
 import { useSlideStore } from '@/store/useSlideStore'
-import ThumbnailPreview from './thumbnail-preview'
+import ProjectThumbnail from './project-thumbnail'
 import { useRouter } from 'next/navigation'
 import AlertDialogBox from '../alert-dialog'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { deleteProject, recoverProject } from '@/actions/project'
 import { Trash2 } from 'lucide-react'
-import { Slide } from '@/lib/types'
+import { usePrefetchProject } from '@/hooks/use-projects'
 type Props = {
     projectId: string
     title: string
     createdAt: string
     themeName: string
     isDeleted: boolean
-    slideData: JsonValue
+    slideData: JsonValue | null // Made optional for new thumbnail system
+    onOptimisticDelete?: (projectId: string) => Promise<void>
+    onOptimisticRecover?: (projectId: string) => Promise<void>
 }
 const ProjectCard = ({projectId, 
                     title, 
                     createdAt, 
                     themeName,
                     isDeleted, 
-                    slideData, 
+                    slideData,
+                    onOptimisticDelete,
+                    onOptimisticRecover, 
                 }: Props) => {
 
         const [loading, setLoading] = useState(false)
         const [open, setOpen] = useState(false)
         const {setSlides} = useSlideStore()
         const router = useRouter()
+        const prefetchProject = usePrefetchProject()
+        
         const handleNavigation = () => {
-            if (slideData && Array.isArray(slideData)) {
-                const slides = slideData as unknown as Slide[]
-                setSlides(slides) // Remove JSON.parse(JSON.stringify())
-                router.push(`/presentation/${projectId}`)
-            } else {
-                console.warn('Invalid slide data for project:', projectId)
+            router.push(`/presentation/${projectId}`)
+        }
+        
+        // Prefetch project data on hover for instant navigation
+        const handleMouseEnter = () => {
+            if (!isDeleted) { // Only prefetch for active projects
+                prefetchProject(projectId)
             }
         }
-        const theme = themes.find((theme) => theme.name === themeName) || themes[0]
         
         //method for handling project recovery
         const handleRecover = async () => {
             setLoading(true)
+            setOpen(false)
+            
             if(!projectId){
                 setLoading(false)
                 toast.error('Error!', {description: 'Project not found.'})
                 return
             }
+            
             try {
-                const res = await recoverProject(projectId)
-                if(res.status !== 200){
-                    toast.error('Error!', {description: 'Something went wrong.'})
-                    return
+                if (onOptimisticRecover) {
+                    // Use optimistic UI if callback provided
+                    await onOptimisticRecover(projectId)
+                } else {
+                    // Fallback to server action + refresh
+                    const res = await recoverProject(projectId)
+                    if(res.status !== 200){
+                        toast.error('Error!', {description: 'Something went wrong.'})
+                        return
+                    }
+                    router.refresh()
+                    toast.success('Success!', {description: 'Project recovered.'})
                 }
-                setOpen(false)
-                router.refresh()
-                toast.success('Success!', {description: 'Project recovered.'})
             } catch (error) {
                 toast.error('Error!', {description: 'Something went wrong.'})
+            } finally {
+                setLoading(false)
             }
         }
 
         //method for handling project deletion
         const handleDelete = async () => {
             setLoading(true)
+            setOpen(false)
+            
             if(!projectId){
                 setLoading(false)
                 toast.error('Error!', {description: 'Project not found.'})
                 return
             }
+            
             try {
-                const res = await deleteProject(projectId)
-                if(res.status !== 200){
-                    toast.error('Error!', {description: 'Failed to delete project.'})
-                    return
+                if (onOptimisticDelete) {
+                    // Use optimistic UI if callback provided
+                    await onOptimisticDelete(projectId)
+                } else {
+                    // Fallback to server action + refresh
+                    const res = await deleteProject(projectId)
+                    if(res.status !== 200){
+                        toast.error('Error!', {description: 'Failed to delete project.'})
+                        return
+                    }
+                    router.refresh()
+                    toast.success('Success!', {description: 'Project deleted.'})
                 }
-                setOpen(false)
-                router.refresh()
-                toast.success('Success!', {description: 'Project deleted.'})
             } catch (error) {
                 toast.error('Error!', {description: 'Something went wrong.'})
+            } finally {
+                setLoading(false)
             }
         }
   return (
     <motion.div
-    variants={itemVariants}
-    
+    variants={optimizedItemVariants}
+    style={{ willChange: 'transform, opacity' }} // Optimize for animations
+    whileHover={{ scale: 1.02 }} // Subtle hover effect
+    transition={{ duration: 0.2 }}
+    onMouseEnter={handleMouseEnter} // Prefetch on hover
     className={`group w-full flex flex-col gap-y-3 rounded-xl p-3 border bg-white/60 dark:bg-white/10 bg-clip-padding backdrop-blur-md backdrop-saturate-100 backdrop-contrast-100 shadow-lg shadow-black/10 border-gray-200 dark:border-transparent transition-colors
     ${!isDeleted && 'hover:backdrop-blur-lg hover:bg-white/70 dark:hover:bg-white/15'}
     `}
+    onAnimationComplete={() => {
+        // Remove will-change after animation to free memory
+        if (typeof window !== 'undefined') {
+            const element = document.currentScript?.parentElement;
+            if (element) element.style.willChange = 'auto';
+        }
+    }}
     >
         <div className='relative aspect-[16/9] rounded-lg cursor-pointer overflow-hidden'
         onClick={handleNavigation}
         >
-            <ThumbnailPreview theme={theme} 
-            slide={JSON.parse(JSON.stringify(slideData))?. [0]}
+            <ProjectThumbnail 
+                projectId={projectId}
+                title={title}
+                themeName={themeName}
             />
         </div>
         <div className='w-full'>
