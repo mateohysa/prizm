@@ -1,8 +1,7 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { useSlideStore } from '@/store/useSlideStore'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { component } from '@/lib/constants'
 import { LayoutSlides } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -16,6 +15,18 @@ import { EllipsisVertical, Trash } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useCallback } from 'react'
 import { updateSlides } from '@/actions/project'
+
+// Save status type
+export type SaveStatus = 'idle' | 'saving' | 'saved' | 'failed'
+
+// Create a context to share save status with parent components
+export const SaveStatusContext = React.createContext<{
+  saveStatus: SaveStatus
+  setSaveStatus: (status: SaveStatus) => void
+}>({ 
+  saveStatus: 'idle', 
+  setSaveStatus: () => {} 
+})
 
 
 interface DropzoneProps {
@@ -202,16 +213,30 @@ const Editor = ({ isEditable }: Props) => {
     const slideRefs = useRef<(HTMLDivElement | null)[]>([])
     const [loading, setLoading] = useState(true)
     const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
+    const lastSavedRef = useRef('')
+    const retryCountRef = useRef(0)
+    const { saveStatus, setSaveStatus } = useContext(SaveStatusContext)
+    const isMountedRef = useRef(true)
 
     const moveSlide = (dragIndex: number, hoverIndex: number) => {
         if(isEditable){
-            reorderSlides(dragIndex, hoverIndex)    
+            reorderSlides(dragIndex, hoverIndex)
+            // Trigger debounced save after reorder
+            if(autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
+            autoSaveTimerRef.current = setTimeout(() => {
+                saveSlides()
+            }, 2000)
         }
     }
     // Remove a slide given its id
     const handleDelete = (slideId: string) => {
         if (isEditable) {
             removeSlide(slideId)
+            // Trigger debounced save after delete
+            if(autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
+            autoSaveTimerRef.current = setTimeout(() => {
+                saveSlides()
+            }, 2000)
         }
     }
     // Handle a drop coming from the Dropzone component
@@ -231,6 +256,11 @@ const Editor = ({ isEditable }: Props) => {
                 id: uuidv4(),
                 slideOrder: dropIndex,
             }, dropIndex)
+            // Trigger debounced save after add
+            if(autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
+            autoSaveTimerRef.current = setTimeout(() => {
+                saveSlides()
+            }, 2000)
         }else if(item.type === 'SLIDE' && item.index !== undefined){
             moveSlide(item.index, dropIndex)
         }
@@ -249,64 +279,153 @@ const Editor = ({ isEditable }: Props) => {
         if(typeof window !== 'undefined') setLoading(false)
     }, [])
 
-    const saveSlides = useCallback(()=>{
-        if(!isEditable && project){
-            ;(async()=> {
-                await updateSlides(project.id, JSON.parse(JSON.stringify(slides)))
-            })()
+    const saveSlides = useCallback(async ()=>{
+        if(!isEditable || !project) return
+        
+        // Skip redundant saves by comparing serialized slides
+        const payload = JSON.stringify(slides)
+        if(payload === lastSavedRef.current) {
+            return // No changes to save
         }
-        //TODO ADD A SMOOTHER INDICATION OF SAVING
+        
+        // Check payload size and use appropriate save method
+        const payloadSizeInBytes = new Blob([payload]).size
+        const payloadSizeInMB = payloadSizeInBytes / (1024 * 1024)
+        
+        setSaveStatus('saving')
+        
+        try {
+            // Use API route for large presentations to avoid server action limits
+            if (payloadSizeInMB > 1) {
+                console.log(`Large presentation (${payloadSizeInMB.toFixed(2)}MB). Using API route for reliable saves.`)
+                const response = await fetch('/api/projects/update-slides', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        projectId: project.id,
+                        slides: JSON.parse(payload)
+                    })
+                })
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`)
+                }
+            } else {
+                // Use server action for smaller presentations
+                await updateSlides(project.id, JSON.parse(payload))
+            }
+            
+            lastSavedRef.current = payload
+            retryCountRef.current = 0
+            setSaveStatus('saved')
+            
+            // Show 'saved' status briefly, then return to idle
+            setTimeout(() => {
+                if(isMountedRef.current) {
+                    setSaveStatus('idle')
+                }
+            }, 1500)
+            
+        } catch (error) {
+            console.error('Save failed:', error)
+            
+            // Check if it's a size-related error
+            const errorMessage = error instanceof Error ? error.message : String(error)
+            if (errorMessage.includes('exceeded') || errorMessage.includes('limit')) {
+                console.warn('Save failed due to size limit. Presentation may be too large.')
+                setSaveStatus('failed')
+                retryCountRef.current = 0 // Don't retry size errors
+                return
+            }
+            
+            retryCountRef.current += 1
+            
+            if (retryCountRef.current < 3) {
+                // Retry after 2 seconds
+                setTimeout(() => {
+                    if(isMountedRef.current) {
+                        saveSlides()
+                    }
+                }, 2000)
+            } else {
+                // Max retries reached
+                setSaveStatus('failed')
+                retryCountRef.current = 0
+            }
+        }
     }, [isEditable, slides, project])
     useEffect(()=>{
         if(autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
 
         if(isEditable){
             autoSaveTimerRef.current = setTimeout(()=>{
+                saveSlides()
             }, 2000)
         }
         return ()=>{
             if(autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
         }
+    }, [slides, isEditable, project, saveSlides])
+    
+    // Save on unmount to ensure no data is lost
+    useEffect(() => {
+        isMountedRef.current = true
+        
+        return () => {
+            isMountedRef.current = false
+            // Perform final save if there are unsaved changes
+            const payload = JSON.stringify(slides)
+            if(payload !== lastSavedRef.current && isEditable && project) {
+                // Use navigator.sendBeacon for reliable save on page unload
+                if(typeof navigator !== 'undefined' && navigator.sendBeacon) {
+                    navigator.sendBeacon('/api/projects/update-slides', JSON.stringify({
+                        projectId: project.id,
+                        slides: JSON.parse(payload)
+                    }))
+                } else {
+                    // Fallback synchronous save (may not complete)
+                    updateSlides(project.id, JSON.parse(payload)).catch(console.error)
+                }
+            }
+        }
     }, [slides, isEditable, project])
 
     return (
-        <div
-        className='flex-1 flex flex-col h-full max-w-3xl mx-auto px-4 mb-20'
-        >
+        <div className="max-w-3xl mx-auto px-4">
             {loading ? 
-            <div className="w-full px-4 flex flex-col space-y-6"> 
+            <div className="w-full flex flex-col space-y-6 py-8"> 
                 <Skeleton className="h-52 w-full" />
                 <Skeleton className="h-52 w-full" /> 
                 <Skeleton className="h-52 w-full" /> 
             </div>
             : 
-            <ScrollArea className='flex-1 mt-8'>
-                <div className='px-4 pb-4 space-y-4 pt-2'>
-                    {isEditable && (
+            <div className='pb-20 space-y-4 pt-8'>
+                {isEditable && (
+                    <Dropzone
+                        index={0} // TODO: replace with dynamic index if needed
+                        onDrop={handleDrop}
+                        isEditable={isEditable}
+                    />
+                )}
+                {orderedSlides.map((slide, index) => (
+                    <React.Fragment key={`${slide.id}-${index}`}>
+                        <DraggableSlide
+                            slide={slide}
+                            index={index}
+                            moveSlide={moveSlide}
+                            handleDelete={handleDelete}
+                            isEditable={isEditable}
+                        />
                         <Dropzone
-                            index={0} // TODO: replace with dynamic index if needed
-                            onDrop={handleDrop}
-                            isEditable={isEditable}
-                        />
-                    )}
-                    {orderedSlides.map((slide, index) => (
-                        <React.Fragment key={`${slide.id}-${index}`}>
-                            <DraggableSlide
-                                slide={slide}
-                                index={index}
-                                moveSlide={moveSlide}
-                                handleDelete={handleDelete}
-                                isEditable={isEditable}
-                            />
-                            <Dropzone
-                            index={index + 1} // TODO: replace with dynamic index if needed
-                            onDrop={handleDrop}
-                            isEditable={isEditable}
-                        />
-                        </React.Fragment>
-                    ))}
-                </div>
-            </ScrollArea>
+                        index={index + 1} // TODO: replace with dynamic index if needed
+                        onDrop={handleDrop}
+                        isEditable={isEditable}
+                    />
+                    </React.Fragment>
+                ))}
+            </div>
             }
         </div>
     )
