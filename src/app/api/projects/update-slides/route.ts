@@ -15,7 +15,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Use the same server action but through API route to avoid body size limits
-    await updateSlides(projectId, slides)
+    const result = await updateSlides(projectId, slides)
+    
+    // Handle the server action's response format
+    if (result.status !== 200) {
+      return NextResponse.json({ 
+        error: result.error || 'Update failed' 
+      }, { status: result.status })
+    }
     
     return NextResponse.json({ success: true })
   } catch (error) {

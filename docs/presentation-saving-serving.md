@@ -36,9 +36,9 @@ This guide outlines low‑risk, incremental improvements to how presentations ar
 
 ## Low‑Risk Serve Improvements
 
-- [ ] Enforce ownership in server actions to centralize auth.
+- [x] Enforce ownership in server actions to centralize auth.
   - File: `src/actions/project.ts:331` (inside `updateSlides(...)`)
-    - Authenticate user and confirm the project’s `userId` matches before updating.
+    - Authenticate user and confirm the project's `userId` matches before updating.
   - File: `src/actions/project.ts:304` (inside `getProjectById(...)`)
     - Add `userId: checkUser.user.id` to the `where` clause so SSR fetches are authorization‑safe.
 
