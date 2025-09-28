@@ -42,9 +42,9 @@ This guide outlines low‑risk, incremental improvements to how presentations ar
   - File: `src/actions/project.ts:304` (inside `getProjectById(...)`)
     - Add `userId: checkUser.user.id` to the `where` clause so SSR fetches are authorization‑safe.
 
-- [ ] Keep lists lean: Continue excluding `slides` from list endpoints to reduce payload size. (Already done in paginated endpoints.)
+- [x] Keep lists lean: Continue excluding `slides` from list endpoints to reduce payload size. (Already done in paginated endpoints.)
 
-- [ ] Keep Presentation Mode lean: It already renders a single slide at a time. Only consider prerendering next/prev offscreen if you observe jank on heavy slides.
+- [x] Keep Presentation Mode lean: It already renders a single slide at a time. Only consider prerendering next/prev offscreen if you observe jank on heavy slides.
 
 ## Optional (Still Low Blast Radius)
 
