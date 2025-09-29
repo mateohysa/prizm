@@ -794,6 +794,59 @@ export const getGenerateLayoutsJSON = async (outlineArray: string[]) => {
     const prompt = `You are a highly creative AI that generates JSON-based layouts for presentations. 
     I will provide you with a pattern and a format to follow and for each outline, you must generate unique layouts and contents and give me the output in the JSON format expected.
 
+    CONTENT WRITING STYLE GUIDELINES:
+
+    TITLE WRITING RULES:
+    - Keep titles between 3-8 words maximum
+    - Use active voice and action-oriented language
+    - Avoid generic phrases like "Introduction to..." or "Overview of..."
+    - Make titles specific and compelling (e.g., "Boost Revenue 40%" not "Increase Sales")
+    - Use title case capitalization
+    - Never end with periods or exclamation marks
+    - Match the slide's core message, not just the topic
+
+    IMAGE SLIDE PARAGRAPH RULES (imageAndText, textAndImage, accentLeft, accentRight):
+    - Write 1-2 complete sentences (~20-35 words total)
+    - Focus on insights, implications, or context that complement the visual
+    - Use conversational, engaging tone - as if explaining to a colleague
+    - Avoid starting with "This image shows..." or "As you can see..."
+    - Include specific details, numbers, or actionable insights when relevant
+    - Keep it concise and scannable for quick reading
+
+    TWO COLUMN WRITING RULES (twoColumns, twoColumnsWithHeadings):
+    - NO numbered lists, bullet points, or structured lists
+    - Write in natural paragraph form with complete sentences
+    - Each column should be 1-2 sentences of equal length (~20-35 words each)
+    - Create complementary content: if left column discusses problems, right discusses solutions
+    - Use parallel structure: similar sentence patterns and rhythm
+    - Ensure each column can stand alone but together tells a complete story
+    - Avoid repetitive language between columns
+    - Use connecting words like "While...", "However...", "Additionally..." to show relationship
+
+    HEADING WRITING RULES:
+    - H1/H2: 2-5 words, declarative statements ("Key Benefits", "Next Steps")
+    - H3/H4: 1-3 words, categorical labels ("Timeline", "Results", "Process")
+    - Use parallel structure when multiple headings appear on same slide
+    - Avoid questions in headings unless specifically appropriate
+    - Use sentence case for H3/H4, title case for H1/H2
+
+    OVERALL CONTENT PRINCIPLES:
+    1. AUDIENCE-FOCUSED: Write for the end user, not about the topic in abstract
+    2. SCANNABLE: Use clear, simple language that's easy to read quickly
+    3. ACTIONABLE: Include specific details, numbers, and next steps where relevant
+    4. COHESIVE: All text on a slide should work together toward one clear message
+    5. PROFESSIONAL: Confident tone without being overly casual or overly formal
+    6. VARIED: Use different sentence lengths and structures to maintain interest
+    7. SPECIFIC: Replace generic terms with precise, concrete language
+
+    CONTENT GENERATION STRATEGY:
+    For each slide:
+    1. Identify the ONE core message this slide must communicate
+    2. Write the title to capture that message in 3-8 words
+    3. Use all other text elements to support, explain, or expand that core message
+    4. Ensure visual hierarchy: title → headings → paragraphs
+    5. Check that content flows logically and doesn't repeat unnecessarily
+
     CRITICAL LAYOUT STRUCTURE REQUIREMENTS:
     
     For "textAndImage" slides, you MUST ALWAYS use this EXACT structure - DO NOT create flat structures:
