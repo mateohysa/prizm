@@ -1,6 +1,6 @@
 'use client'
 import { useSlideStore } from '@/store/useSlideStore'
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Home, Play, Share, Menu } from 'lucide-react'
@@ -8,12 +8,15 @@ import { toast } from 'sonner'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import LayoutPreview from '../editor-sidebar/LeftSidebar/LayoutPreview'
 import PresentationMode from './PresentationMode'
+import SaveIndicator from '@/components/global/save-indicator'
+import { SaveStatusContext } from '../editor/Editor'
 
 type Props = {presentationId: string, presentationTitle: string}
 
 const Navbar = ({presentationId, presentationTitle}: Props) => {
     const {currentTheme} = useSlideStore()
     const [isPresentationMode, setIsPresentationMode] = useState(false)
+    const { saveStatus } = useContext(SaveStatusContext)
 
     const handleCopy = () => {
         navigator.clipboard.writeText(`${window.location.origin}/share/${presentationId}`)
@@ -57,11 +60,15 @@ const Navbar = ({presentationId, presentationTitle}: Props) => {
                 </Button>
             </Link>
         </div>
-        {/* HREF IS SUBJECT TO CHANGE */}
+        {/* Center section with title */}
         <Link href={`/presentation/templatemarket`}
             className="text-lg font-semibold hidden sm:block text-foreground"
         >{presentationTitle}</Link>
         <div className='flex items-center gap-4'>
+            {/* Fixed width container for save indicator to prevent layout shift */}
+            <div className="w-20 flex justify-center">
+                <SaveIndicator status={saveStatus} />
+            </div>
             <Button 
             variant="outline"
             onClick={handleCopy}

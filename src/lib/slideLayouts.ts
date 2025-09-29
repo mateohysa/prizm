@@ -65,7 +65,7 @@ export const AccentLeft = {
                 placeholder: "start typing here",
               },
             ],
-            className: "w-full h-full p-8 flex justify-center items-center",
+            className: "w-full h-full p-6 flex justify-center items-center",
             placeholder: "Heading1",
           },
         ],
@@ -109,7 +109,7 @@ export const AccentRight = {
                 placeholder: "start typing here",
               },
             ],
-            className: "w-full h-full p-8 flex justify-center items-center",
+            className: "w-full h-full p-6 flex justify-center items-center",
             placeholder: "Heading1",
           },
           {
@@ -178,7 +178,7 @@ export const ImageAndText = {
                 placeholder: "start typing here",
               },
             ],
-            className: "w-full h-full p-8 flex justify-center items-center",
+            className: "w-full h-full p-6 flex justify-center items-center",
             placeholder: "Paragraph",
           },
         ],
@@ -222,7 +222,7 @@ export const TextAndImage = {
                 placeholder: "start typing here",
               },
             ],
-            className: "w-full h-full p-8 flex justify-center items-center",
+            className: "w-full h-full p-6 flex justify-center items-center",
             placeholder: "Paragraph",
           },
           {
@@ -250,7 +250,7 @@ export const TextAndImage = {
 export const TwoColumns = {
   slideName: "Two columns",
   type: "twoColumns",
-  className: "p-4 mx-auto flex justify-center items-center",
+  className: "p-2.5 mx-auto flex justify-center items-center",
   content: {
     id: uuidv4(),
     type: "column" as ContentType,
@@ -292,7 +292,7 @@ export const TwoColumns = {
 export const TwoColumnsWithHeadings = {
   slideName: "Two columns with headings",
   type: "twoColumnsWithHeadings",
-  className: "p-4 mx-auto flex justify-center items-center",
+  className: "p-2 mx-auto flex justify-center items-center",
   content: {
     id: uuidv4(),
     type: "column" as ContentType,

@@ -1,7 +1,7 @@
 "use server"
 
 import { AArrowDown } from "lucide-react"
-import { onAuthenticateUser } from "./user"
+import { getCachedAuthenticatedUser } from "./user"
 import { client } from "@/lib/prisma"
 import { OutlineCard, Slide } from "@/lib/types"
 import { JsonValue } from "@prisma/client/runtime/library"
@@ -268,7 +268,7 @@ export const createProject = async (title: string, outlines: OutlineCard[]) => {
             return {status: 400, error: "Title and outlines are required"}
         }
         const allOutlines = outlines.map((outline) => outline.title)
-        const checkUser = await onAuthenticateUser()
+        const checkUser = await getCachedAuthenticatedUser()
         if(checkUser.status !== 200 || !checkUser.user){
             return {status: 403, error: "User not authenticated"}
         }
@@ -303,13 +303,14 @@ export const createProject = async (title: string, outlines: OutlineCard[]) => {
  */
 export const getProjectById = async (projectId: string) => {
     try{
-        const checkUser = await onAuthenticateUser()
+        const checkUser = await getCachedAuthenticatedUser()
         if(checkUser.status !== 200 || !checkUser.user){
             return {status: 403, error: "User not authenticated"}
         }
         const project = await client.project.findFirst({
             where: {
                 id: projectId,
+                userId: checkUser.user.id
             }
         })
         if(!project){
@@ -333,6 +334,25 @@ export const updateSlides = async (projectId: string, slides: JsonValue[]) => {
         if(!projectId || !slides){
             return {status: 400, error: "Project ID and slides are required"}
         }
+        
+        // Authenticate user and verify ownership
+        const checkUser = await getCachedAuthenticatedUser()
+        if(checkUser.status !== 200 || !checkUser.user){
+            return {status: 403, error: "User not authenticated"}
+        }
+        
+        // First, verify the project exists and belongs to the user
+        const project = await client.project.findFirst({
+            where: {
+                id: projectId,
+                userId: checkUser.user.id
+            }
+        })
+        
+        if(!project){
+            return {status: 404, error: "Project not found or access denied"}
+        }
+        
         const updatedProject = await client.project.update({
             where: {
                 id: projectId,
@@ -392,7 +412,7 @@ export const updateProjectTheme = async (projectId: string, theme: string) => {
  */
 export const deleteAllProjects = async (projectIds: string[]) => {
     try {
-        const checkUser = await onAuthenticateUser()
+        const checkUser = await getCachedAuthenticatedUser()
         if(checkUser.status !== 200 || !checkUser.user){
             return {status: 403, error: "User not authenticated"}
         }
@@ -527,7 +547,7 @@ export const getDeletedProjectsPaginated = async (
  */
 export const getDeletedProjects = async () => {
      try {
-        const checkUser = await onAuthenticateUser()
+        const checkUser = await getCachedAuthenticatedUser()
         if(checkUser.status !== 200 || !checkUser.user){
             return {status: 403, error: "User not authenticated"}
         }
