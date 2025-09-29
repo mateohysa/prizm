@@ -305,7 +305,7 @@ const Editor = ({ isEditable }: Props) => {
                     },
                     body: JSON.stringify({
                         projectId: project.id,
-                        slides: JSON.parse(payload)
+                        slides: slides
                     })
                 })
                 
@@ -314,7 +314,7 @@ const Editor = ({ isEditable }: Props) => {
                 }
             } else {
                 // Use server action for smaller presentations
-                await updateSlides(project.id, JSON.parse(payload))
+                await updateSlides(project.id, slides)
             }
             
             lastSavedRef.current = payload
@@ -397,13 +397,14 @@ const Editor = ({ isEditable }: Props) => {
             if(payload !== lastSavedRef.current && isEditableRef.current && projectRef.current) {
                 // Use navigator.sendBeacon for reliable save on page unload
                 if(typeof navigator !== 'undefined' && navigator.sendBeacon) {
-                    navigator.sendBeacon('/api/projects/update-slides', JSON.stringify({
+                    const beaconData = new Blob([JSON.stringify({
                         projectId: projectRef.current.id,
-                        slides: JSON.parse(payload)
-                    }))
+                        slides: slidesRef.current
+                    })], { type: 'application/json' })
+                    navigator.sendBeacon('/api/projects/update-slides', beaconData)
                 } else {
                     // Fallback synchronous save (may not complete)
-                    updateSlides(projectRef.current.id, JSON.parse(payload)).catch(console.error)
+                    updateSlides(projectRef.current.id, slidesRef.current).catch(console.error)
                 }
             }
         }
