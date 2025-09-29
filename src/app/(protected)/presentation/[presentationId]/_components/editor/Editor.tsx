@@ -367,30 +367,47 @@ const Editor = ({ isEditable }: Props) => {
         return ()=>{
             if(autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
         }
-    }, [slides, isEditable, project, saveSlides])
+    }, [slides, isEditable, project])
     
-    // Save on unmount to ensure no data is lost
+    // Keep refs updated for unmount save
+    const slidesRef = useRef(slides)
+    const isEditableRef = useRef(isEditable)
+    const projectRef = useRef(project)
+    
+    useEffect(() => {
+        slidesRef.current = slides
+    }, [slides])
+    
+    useEffect(() => {
+        isEditableRef.current = isEditable
+    }, [isEditable])
+    
+    useEffect(() => {
+        projectRef.current = project
+    }, [project])
+
+    // Save on unmount to ensure no data is lost - runs only once
     useEffect(() => {
         isMountedRef.current = true
         
         return () => {
             isMountedRef.current = false
             // Perform final save if there are unsaved changes
-            const payload = JSON.stringify(slides)
-            if(payload !== lastSavedRef.current && isEditable && project) {
+            const payload = JSON.stringify(slidesRef.current)
+            if(payload !== lastSavedRef.current && isEditableRef.current && projectRef.current) {
                 // Use navigator.sendBeacon for reliable save on page unload
                 if(typeof navigator !== 'undefined' && navigator.sendBeacon) {
                     navigator.sendBeacon('/api/projects/update-slides', JSON.stringify({
-                        projectId: project.id,
+                        projectId: projectRef.current.id,
                         slides: JSON.parse(payload)
                     }))
                 } else {
                     // Fallback synchronous save (may not complete)
-                    updateSlides(project.id, JSON.parse(payload)).catch(console.error)
+                    updateSlides(projectRef.current.id, JSON.parse(payload)).catch(console.error)
                 }
             }
         }
-    }, [slides, isEditable, project])
+    }, []) // Empty dependency array - runs only on mount/unmount
 
     return (
         <div className="max-w-3xl mx-auto px-4">
