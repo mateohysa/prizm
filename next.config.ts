@@ -2,6 +2,19 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '5mb', // Increased from default 1mb to handle large presentations
+    },
+  },
+  
+  // Also configure API routes body size limit
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb', // Allow even larger payloads for API routes
+    },
+  },
 
   images: {
     remotePatterns: [

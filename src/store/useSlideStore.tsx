@@ -52,6 +52,15 @@ const createSafeStorage = () => ({
     // Check if we're in the browser environment
     if (typeof window === 'undefined') return;
     
+    // Check payload size and skip localStorage for large presentations
+    const payloadSizeInBytes = new Blob([value]).size;
+    const payloadSizeInMB = payloadSizeInBytes / (1024 * 1024);
+    
+    if (payloadSizeInMB > 1.5) {
+      console.warn(`Large presentation (${payloadSizeInMB.toFixed(2)}MB) detected. Skipping localStorage persistence to prevent quota errors. Relying on server saves.`);
+      return; // Skip localStorage entirely for large presentations
+    }
+    
     try {
       localStorage.setItem(name, value);
     } catch (error) {
@@ -63,7 +72,7 @@ const createSafeStorage = () => ({
           localStorage.setItem(name, value);
           console.log('Successfully saved after cleanup');
         } catch (retryError) {
-          console.error('Data too large for localStorage even after cleanup');
+          console.error('Data too large for localStorage even after cleanup. Disabling persistence for large presentations.');
           // Don't throw - just log and continue
         }
       } else {
