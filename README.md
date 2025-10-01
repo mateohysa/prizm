@@ -16,11 +16,11 @@
 
 ---
 
-## ✨ Overview
+##  Overview
 
 Prizm is a modern, AI-assisted presentation builder that bridges the gap between rapid ideation and polished presentations. Simply provide a prompt, and Prizm generates a complete slide deck with intelligent layouts, themed design, and smooth editing capabilities. Whether you're crafting a business pitch, educational content, or creative storytelling, Prizm accelerates your workflow while maintaining full creative control.
 
-## 🎯 Key Features
+##  Key Features
 
 ### AI-Powered Content Generation
 - **Intelligent Outlines**: Generate presentation structure from natural language prompts
@@ -48,7 +48,7 @@ Prizm is a modern, AI-assisted presentation builder that bridges the gap between
 - **Fast Thumbnails**: Canvas-based thumbnail generation for quick loading
 - **Project Organization**: Efficient project management and version tracking
 
-## 🏗️ Tech Stack
+##  Tech Stack
 
 ### Frontend
 - **Framework**: [Next.js 15](https://nextjs.org/) with App Router
@@ -69,7 +69,7 @@ Prizm is a modern, AI-assisted presentation builder that bridges the gap between
   - [Google Gemini](https://ai.google.dev/)
   - [Groq](https://groq.com/)
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 
@@ -89,10 +89,6 @@ Prizm is a modern, AI-assisted presentation builder that bridges the gap between
 2. **Install dependencies**
    ```bash
    npm install
-   # or
-   pnpm install
-   # or
-   yarn install
    ```
 
 3. **Set up environment variables**
@@ -146,7 +142,7 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
 See `.env.example` for a complete template.
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 prizm/
@@ -173,25 +169,14 @@ prizm/
 └── tailwind.config.ts       # Tailwind configuration
 ```
 
-## 🔐 Security & Privacy
+##  Security & Privacy
 
 - **Authentication**: All protected routes require authentication via Clerk
 - **Authorization**: Server-side checks enforce resource ownership
 - **Environment Security**: Sensitive credentials stored in environment variables (never committed)
 - **Data Protection**: User data isolated per account with database-level constraints
 
-## 🗺️ Roadmap
-
-- [ ] **Auto-save**: Debounced auto-save with server-side snapshots
-- [ ] **Collaboration**: Real-time collaborative editing support
-- [ ] **Export Options**: PDF and PNG export capabilities
-- [ ] **Presenter Tools**: Speaker notes, timer, and audience view
-- [ ] **Performance**: Enhanced instrumentation and optimization
-- [ ] **Templates**: Pre-built presentation templates library
-- [ ] **Animations**: Slide transition customization
-- [ ] **Mobile Support**: Responsive editing experience
-
-## 🏛️ Architecture
+##  Architecture
 
 ### Data Model
 
@@ -213,35 +198,16 @@ Multiple AI providers support different use cases:
 - **Content Suggestions**: Context-aware content recommendations
 - **Layout Intelligence**: Optimal layout selection based on content type
 
-## 📝 Contributing
+##  Contributing
 
 Thank you for your interest in Prizm! This project is currently a personal endeavor and **not accepting external contributions** at this time. However, feel free to:
 
-- ⭐ Star the repository if you find it useful
-- 🐛 Report bugs by opening an issue
-- 💡 Share feedback and suggestions
-- 🔀 Fork the project for your own use
+-  Star the repository if you find it useful
+-  Report bugs by opening an issue
+-  Share feedback and suggestions
+-  Fork the project for your own use
 
-## 📄 License
+##  License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
-
-Built with amazing open-source technologies:
-- [Next.js](https://nextjs.org/) by Vercel
-- [shadcn/ui](https://ui.shadcn.com/) for beautiful components
-- [Radix UI](https://www.radix-ui.com/) for accessible primitives
-- [Tailwind CSS](https://tailwindcss.com/) for styling
-- [Clerk](https://clerk.com/) for authentication
-- AI providers: OpenAI, Google, and Groq
-
----
-
-<div align="center">
-  
-  **Built with ❤️ using Next.js and AI**
-  
-  [Report Bug](https://github.com/yourusername/prizm/issues) · [Request Feature](https://github.com/yourusername/prizm/issues)
-  
-</div>
